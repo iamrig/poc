@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14161A"><title>Truckmasters Road Service · Rig</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#14161A;--surface:#1E2126;--line:#343940;--text:#F2EFE6;--muted:#A7ADB5;--amber:#F5B301;--green:#5CC48D;--display:'Barlow Condensed','Arial Narrow',sans-serif;--body:'Barlow',system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 var(--body)}button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.5}a{color:inherit}button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--amber);outline-offset:3px}[hidden]{display:none!important}
+.topbar{max-width:1240px;margin:auto;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none}.brand svg{width:36px;height:36px}.wordmark{font:800 28px/1 var(--display);letter-spacing:.08em}.square{color:var(--amber)}.topbar small{color:var(--muted);font-size:13px}.layout{max-width:1240px;margin:40px auto;display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.25fr);gap:64px;padding:0 32px;align-items:start}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}.shop-mark{width:58px;height:58px;border:1px solid var(--amber);display:grid;place-items:center;font:800 25px var(--display);color:var(--amber);margin:28px 0 16px;transform:skew(-6deg)}h1{font:800 clamp(48px,5vw,70px)/.98 var(--display);text-transform:uppercase;margin:0;letter-spacing:-.01em}h1 span{color:var(--amber)}.intro{font-size:18px;color:var(--muted);max-width:360px;margin:22px 0}.status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green)}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}.shop-details{border-block:1px solid var(--line);padding:20px 0;margin-top:30px;display:grid;gap:12px;color:var(--muted);font-size:14px}.shop-details strong{color:var(--text);font-weight:500}.steps{list-style:none;padding:0;margin:28px 0;display:grid;gap:18px}.steps li{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:14px}.step-num{border:1px solid var(--line);width:28px;height:28px;display:grid;place-items:center;border-radius:50%;font-size:12px}.steps li.active{color:var(--text)}.steps li.active .step-num{background:var(--amber);border-color:var(--amber);color:var(--bg)}.steps li.done .step-num{color:var(--green);border-color:var(--green)}.help-note{color:var(--muted);font-size:12px;max-width:370px}.demo-note{color:var(--muted);font-size:12px;margin-top:24px}.reset{border:0;background:none;color:var(--muted);text-decoration:underline;padding:8px 0;font-size:12px}
+.chat{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:0 24px 70px #0003;display:flex;flex-direction:column;height:min(760px,calc(100dvh - 160px));min-height:560px}.chat-head{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}.bot-avatar{background:var(--amber);border-radius:10px;width:42px;height:42px;display:grid;place-items:center;flex-shrink:0}.bot-avatar svg{width:30px;height:30px}.agent-title{font-weight:600}.agent-sub{color:var(--muted);font-size:12px}.lang{margin-left:auto;display:flex;gap:2px;border:1px solid var(--line);padding:3px;border-radius:6px}.lang button{background:transparent;color:var(--muted);border:0;padding:7px;font-size:12px;border-radius:4px}.lang button[aria-pressed=true]{background:#343940;color:var(--text)}
+.thread{padding:22px 24px;overflow-y:auto;flex:1;scroll-behavior:smooth}.day{text-align:center;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}.message{display:flex;flex-direction:column;align-items:flex-start;margin:0 0 18px}.message p{margin:0;padding:14px 17px;max-width:88%;background:#2A2F37;border:1px solid #353B44;border-radius:2px 12px 12px 12px;font-size:15px;overflow-wrap:anywhere;white-space:pre-line}.message.user{align-items:flex-end}.message.user p{background:var(--amber);color:var(--bg);border:0;border-radius:12px 2px 12px 12px}.message small{font-size:10px;color:var(--muted);margin-top:5px}.quick{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 22px}.quick button{background:transparent;border:1px solid #5D626A;border-radius:999px;color:var(--text);font-size:13px;min-height:40px;padding:8px 14px}.quick button:hover{border-color:var(--amber);color:var(--amber)}.typing{color:var(--muted);font-size:13px;padding:0 24px 12px}.composer{padding:16px 20px 12px;border-top:1px solid var(--line);background:var(--surface)}.input-wrap{display:flex;gap:8px;border:1px solid #515761;background:var(--bg);border-radius:8px;padding:8px;align-items:flex-end}textarea{resize:none;min-height:42px;max-height:100px;flex:1;width:100%;border:0;background:transparent;color:var(--text);padding:10px 8px;font-size:15px}textarea::placeholder{color:var(--muted)}.send{background:var(--amber);color:var(--bg);border:0;border-radius:5px;width:42px;height:42px;flex-shrink:0;font-size:22px}.composer-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted)}.powered{font-weight:600;letter-spacing:.05em}.request{border:1px solid var(--green);border-radius:8px;padding:18px;margin:12px 0 22px;background:#5CC48D08}.request h2{font:700 24px var(--display);margin:0 0 14px}.request dl{margin:0;display:grid;gap:10px}.request dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.request dd{margin:0;font-size:14px;overflow-wrap:anywhere}.request button{margin-top:18px;background:var(--amber);color:var(--bg);border:0;border-radius:5px;padding:12px 18px;font-weight:600;min-height:44px}.request .secondary{background:transparent;border:1px solid var(--line);color:var(--text);margin-left:8px}
+@media(max-width:800px){.topbar{padding:16px 20px}.layout{grid-template-columns:1fr;gap:24px;margin:24px auto;padding:0 20px}.shop-mark,.shop-details,.steps,.help-note{display:none}h1{font-size:38px}.intro{margin:12px 0;font-size:15px;max-width:none}.shop .eyebrow{margin-bottom:12px}.chat{height:calc(100dvh - 100px);min-height:520px;max-height:760px}.demo-note{margin:12px 0 0}.chat-head{padding:16px}.thread{padding:20px 16px}.topbar small{font-size:11px}}@media(max-width:400px){.layout{padding:0 12px}.chat-head{gap:8px}.lang button{padding:6px}.message p{max-width:94%}.composer{padding:12px}.topbar{padding:14px}.agent-sub{font-size:11px}}@media(prefers-reduced-motion:reduce){.thread{scroll-behavior:auto}}
+</style></head>
+<body>
+<svg style="display:none" aria-hidden="true"><symbol id="robot" viewBox="0 0 60 60"><path d="M21 15V7m18 8V7" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><rect x="10" y="15" width="40" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="3"/><path d="M23 26v6m14-6v6M22 40h16M22 45h16M5 28v12m50-12v12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol></svg>
+<header class="topbar"><a href="../../index.html" class="brand" aria-label="Rig home"><svg style="color:var(--amber)" aria-hidden="true"><use href="#robot"/></svg><span class="wordmark">RIG<span class="square">▪</span></span></a><small id="top-label">Truckmasters / Road service</small></header>
+<main class="layout"><section class="shop"><div class="eyebrow" id="eyebrow">Your direct line to the shop</div><div class="shop-mark" aria-hidden="true">TM</div><h1>Truckmasters<br><span id="service-title">Road service.</span></h1><p class="intro" id="intro">Truck down? Tell Rig what happened. We'll get the details ready for the Truckmasters crew.</p><div class="status"><span class="dot"></span><span id="online-label">Rig is here · Available 24/7</span></div><div class="shop-details"><div><strong>Truckmasters</strong> · <span id="shop-type">Truck repair & roadside assistance</span></div><div id="no-account">No account needed. Just start typing.</div></div><ol class="steps"><li class="active" id="step-0"><span class="step-num">1</span><span id="step-label-0">Tell us what's wrong</span></li><li id="step-1"><span class="step-num">2</span><span id="step-label-1">Share your truck & location</span></li><li id="step-2"><span class="step-num">3</span><span id="step-label-2">Review your service request</span></li></ol><p class="help-note" id="help-note">If you're in immediate danger, contact emergency services first. A service request does not confirm a technician or an arrival time.</p><p class="demo-note" id="demo-note">Interactive preview · No request is sent.</p><button class="reset" id="reset" type="button">Start a new conversation</button></section>
+<section class="chat" aria-label="Road service chat"><header class="chat-head"><div class="bot-avatar" aria-hidden="true"><svg><use href="#robot"/></svg></div><div><div class="agent-title">Rig <span style="color:var(--green);font-size:12px">●</span></div><div class="agent-sub" id="agent-sub">Truckmasters' service assistant</div></div><div class="lang" aria-label="Language"><button type="button" id="en" aria-pressed="true">EN</button><button type="button" id="es" aria-pressed="false">ES</button></div></header><div class="thread" id="thread" role="log" aria-live="polite" aria-relevant="additions" aria-label="Messages"></div><div class="typing" id="typing" hidden>Rig is typing…</div><form class="composer" id="composer"><div class="input-wrap"><textarea id="message" rows="1" maxlength="1000" required placeholder="Tell us what's going on…" aria-label="Message to Rig"></textarea><button class="send" id="send" type="submit" aria-label="Send message">↑</button></div><div class="composer-foot"><span id="composer-hint">Web chat · No app needed</span><span class="powered">POWERED BY RIG<span class="square">▪</span></span></div></form></section></main>
+<style>
+/* agent pieces: simulated texts, the location-share card on the driver's phone, and the work order with its estimate */
+.sms{max-width:92%;margin:0 0 18px;padding:10px 12px;border:1px dashed var(--muted);border-radius:10px;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.phone{margin:0 0 18px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.phone b{display:block;margin-bottom:4px}
+.phone p{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.phone button{background:var(--amber);color:var(--bg);border:0;border-radius:5px;padding:12px 18px;font-weight:600;min-height:44px;width:100%}
+.phone button:disabled{opacity:.6}
+.phone .ok{color:var(--green);font-weight:600}
+.phone a,.request a{color:var(--amber)}
+.request table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+.request td{padding:7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.request td:last-child{text-align:right;padding-left:12px;white-space:nowrap}
+.request tr.tot td{font-weight:700;border-bottom:0;font-size:16px}
+.request .note{margin:10px 0 0;font-size:12px;color:var(--muted)}
+.handoff{margin:0 0 18px;padding:10px 12px;border-left:3px solid var(--amber);font-size:13px;color:var(--muted)}
+</style>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const copy={
+en:{title:'Road service.',eyebrow:'Your direct line to the shop',intro:"Truck down? Tell Rig what happened. We'll get the details ready for the Truckmasters crew.",online:'Rig is here · Available 24/7',type:'Truck repair & roadside assistance',account:'No account needed. Just start typing.',
+steps:["Tell us what's wrong",'Share your truck & location','Review your work order'],
+help:"If you're in immediate danger, contact emergency services first. A service request does not confirm a technician or an arrival time.",demo:'Interactive preview · Scripted replies · Nothing is sent.',reset:'Start a new conversation',agent:"Truckmasters’ service assistant",placeholder:"Tell us what's going on…",hint:'Web chat · No app needed',typing:'Rig is typing…',
+greeting:"Hey, I'm Rig, Truckmasters’ service assistant. What happened to the truck, and where are you?",
+empty:'Please add a little more detail.',send:'Send message',message:'Message to Rig',today:'Today · Truckmasters',you:'You',
+kinds:{tire:'flat tire',start:"won't start",engine:'engine or DEF fault',other:'mechanical issue'},
+gotIt:k=>`Got it, a ${k}.`,
+askLoc:h=>(h?`You said “${h}”. `:'')+"Can I text you a link to share your exact location? It's faster and more accurate than describing it. You can also type it.",
+askTruck:'What truck is it? Make, model and year.',
+askCo:'What company is the service for?',
+askPh:'What cell number should I text the signing link to?',
+danger:"If anyone is hurt or in danger, hang up and call 911 now. I'm transferring you to someone at the shop.",
+handoff:'Rig handed this conversation to the Truckmasters crew (demo).',
+sending:'Sending you a text now. Tap the link and choose Share my location.',
+smsLoc:n=>`Text to this number: Truckmasters wants your location. Tap to share: dispatch.example/l/${n} (simulated)`,
+phoneT:"On the driver's phone",phoneP:'Truckmasters is asking for your location so a technician can find you.',share:'Share my location',getting:'Getting your location…',
+shared:'Location shared',acc:n=>`accurate to about ${n} m`,maps:'Open in Maps',sample:"Demo: this is a sample point. The real link reads the phone's GPS.",
+gotLoc:'Got your exact location. Thanks.',
+done:'Done. I built your work order with an estimate and texted you the link. Open it, review it and sign.',
+smsSign:(ph,id)=>`SMS to ${ph}: Truckmasters. Sign your work order here: dispatch.example/o/${id} (simulated)`,
+order:'Order',loc:'Driver location',estimate:'Estimate',
+day:'Roadside service (per hour)',night:'After-hours roadside (per hour)',miles:n=>`Mileage × ${n} mi ($2.48)`,
+priceNote:a=>'The final price depends on actual work time. '+(a?'After-hours':'Daytime')+' rate, based on the current time.',
+chips:{problem:['I got a flat tire on I-35 near Pearsall',"My truck won't start, I'm in San Antonio",'I had an accident'],loc:['Text me the link','I-35 south, mile marker 85, near Pearsall'],truck:['Volvo 860, 2021'],co:['Test Logistics'],ph:['+1 210 555 0100']}},
+es:{title:'Servicio en carretera.',eyebrow:'Tu línea directa con el taller',intro:'¿Tu camión falló? Cuéntale a Rig qué pasó. Prepararemos los datos para el equipo de Truckmasters.',online:'Rig está aquí · Disponible 24/7',type:'Reparación de camiones y asistencia en carretera',account:'Sin crear una cuenta. Solo empieza a escribir.',
+steps:['Cuéntanos qué pasó','Comparte tu camión y ubicación','Revisa tu orden de trabajo'],
+help:'Si estás en peligro inmediato, contacta primero a emergencias. Una solicitud no confirma un técnico ni una hora de llegada.',demo:'Vista interactiva · Respuestas de prueba · No se envía nada.',reset:'Iniciar una nueva conversación',agent:'Asistente de servicio de Truckmasters',placeholder:'Cuéntanos qué está pasando…',hint:'Chat web · Sin instalar una app',typing:'Rig está escribiendo…',
+greeting:'Hola, soy Rig, el asistente de servicio de Truckmasters. ¿Qué le pasó al camión y dónde estás?',
+empty:'Agrega un poco más de información.',send:'Enviar mensaje',message:'Mensaje para Rig',today:'Hoy · Truckmasters',you:'Tú',
+kinds:{tire:'llanta ponchada',start:'no enciende',engine:'falla de motor o DEF',other:'falla mecánica'},
+gotIt:k=>`Entendido: ${k}.`,
+askLoc:h=>(h?`Mencionaste “${h}”. `:'')+'¿Te mando un enlace por mensaje para compartir tu ubicación exacta? Es más rápido y preciso que describirla. También puedes escribirla.',
+askTruck:'¿Qué camión es? Marca, modelo y año.',
+askCo:'¿Para qué compañía es el servicio?',
+askPh:'¿A qué celular te mando el enlace para firmar?',
+danger:'Si alguien está herido o en peligro, cuelga y llama al 911 ahora. Te paso con alguien del taller.',
+handoff:'Rig pasó esta conversación al equipo de Truckmasters (demo).',
+sending:'Te mando un mensaje ahora. Toca el enlace y elige Compartir mi ubicación.',
+smsLoc:n=>`Mensaje a este número: Truckmasters quiere tu ubicación. Toca para compartir: dispatch.example/l/${n} (simulado)`,
+phoneT:'En el teléfono del chofer',phoneP:'Truckmasters te pide tu ubicación para que un técnico te encuentre.',share:'Compartir mi ubicación',getting:'Obteniendo tu ubicación…',
+shared:'Ubicación compartida',acc:n=>`precisión de unos ${n} m`,maps:'Abrir en Maps',sample:'Demo: es un punto de ejemplo. El enlace real lee el GPS del teléfono.',
+gotLoc:'Ya tengo tu ubicación exacta. Gracias.',
+done:'Listo. Armé tu orden de trabajo con un estimado y te mandé el enlace por mensaje. Ábrelo, revísalo y fírmalo.',
+smsSign:(ph,id)=>`SMS a ${ph}: Truckmasters. Firma tu orden de trabajo aquí: dispatch.example/o/${id} (simulado)`,
+order:'Orden',loc:'Ubicación del chofer',estimate:'Estimado',
+day:'Servicio en carretera (por hora)',night:'Servicio en carretera fuera de horario (por hora)',miles:n=>`Millaje × ${n} mi ($2.48)`,
+priceNote:a=>'El precio final depende del tiempo real de trabajo. Tarifa '+(a?'fuera de horario':'de día')+', según la hora actual.',
+chips:{problem:['Se me ponchó una llanta en la I-35 cerca de Pearsall','Mi camión no enciende, estoy en San Antonio','Tuve un accidente'],loc:['Mándame el enlace','I-35 sur, milla 85, cerca de Pearsall'],truck:['Volvo 860, 2021'],co:['Test Logistics'],ph:['+1 210 555 0100']}}
+};
+let lang='en',busy=false,timer,version=0,ag={ask:'problem',d:{}};
+const c=()=>copy[lang];
+const SAMPLE={lat:28.8920,lng:-98.9748,acc:8};
+const mapsUrl=p=>`https://www.google.com/maps?q=${p.lat},${p.lng}`;
+const digits=n=>Array.from({length:n},()=>Math.floor(Math.random()*10)).join('');
+const money=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e};
+
+function scroll(){$('thread').scrollTop=$('thread').scrollHeight}
+function bubble(text,user=false){const wrap=el('div','message'+(user?' user':''));const stamp=el('small',null,(user?c().you:'Rig')+' · '+new Date().toLocaleTimeString(lang,{hour:'2-digit',minute:'2-digit'}));wrap.append(el('p',null,text),stamp);$('thread').append(wrap);scroll()}
+function sms(text){$('thread').append(el('div','sms',text));scroll()}
+function progress(n){for(let i=0;i<3;i++)$('step-'+i).className=i<n?'done':i===n?'active':''}
+/* the composer stays closed while Rig waits on a tap, after the order is built, or after a hand-off */
+function closed(){return ['wait','done','human'].includes(ag.ask)}
+function lock(on){busy=on;const off=on||closed();$('send').disabled=off;$('message').disabled=off;document.querySelectorAll('.quick button').forEach(b=>b.disabled=on)}
+/* replies can chain (an ack, then the next question); the composer opens only after the last one */
+let pending=0;
+function reply(cb){const v=version;pending++;lock(true);$('typing').hidden=false;timer=setTimeout(()=>{if(v!==version)return;pending--;$('typing').hidden=true;cb();if(pending>0)return;lock(false);if(!closed())$('message').focus();scroll()},650)}
+function chips(){document.querySelector('.quick')?.remove();const list=c().chips[ag.ask];if(!list)return;const q=el('div','quick');list.forEach(t=>{const b=el('button',null,t);b.type='button';b.onclick=()=>send(t);q.append(b)});$('thread').append(q);scroll()}
+
+/* what the driver described, in a few buckets */
+function kind(t){
+  if(/tire|flat|blowout|llanta|ponch/i.test(t))return c().kinds.tire;
+  if(/won'?t start|no start|dead battery|crank|enciend|arranc|bater/i.test(t))return c().kinds.start;
+  if(/\bdef\b|check engine|engine|motor/i.test(t))return c().kinds.engine;
+  return c().kinds.other;
+}
+/* the agent only asks for what is still missing */
+function nextAsk(){
+  const d=ag.d;
+  if(!d.loc){ag.ask='loc';progress(1);reply(()=>{bubble(c().askLoc(d.hint));chips()})}
+  else if(!d.truck){ag.ask='truck';reply(()=>{bubble(c().askTruck);chips()})}
+  else if(!d.co){ag.ask='co';reply(()=>{bubble(c().askCo);chips()})}
+  else if(!d.ph){ag.ask='ph';reply(()=>{bubble(c().askPh);chips()})}
+  else finish();
+}
+function send(text){
+  text=(text||'').trim();if(!text||busy||closed())return;
+  document.querySelector('.quick')?.remove();
+  bubble(text,true);$('message').value='';$('message').setCustomValidity('');
+  if(/accident|fire|smoke|injur|hurt|crash|accidente|incendio|fuego|herid|humo|choque/i.test(text)){
+    ag.ask='human';lock(false);
+    reply(()=>{bubble(c().danger);$('thread').append(el('div','handoff',c().handoff))});return;
+  }
+  const d=ag.d;
+  if(ag.ask==='problem'){
+    d.problem=text;
+    const m=text.match(/(i-?\s?\d+[^,.]*|hwy[^,.]*|near [^,.]+|\bon [^,.]+|\bin [^,.]+|cerca de [^,.]+|estoy en [^,.]+)/i);
+    if(m)d.hint=m[0].trim();
+    reply(()=>{bubble(c().gotIt(kind(text)));nextAsk()});return;
+  }
+  if(ag.ask==='loc'&&/\blink\b|text me|share|gps|send me|enlace|liga|m[aá]ndame|compart/i.test(text)){startShare();return}
+  d[ag.ask]=text;nextAsk();
+}
+/* the driver taps a texted link and shares GPS; the demo uses a sample point near Pearsall, TX */
+function startShare(){
+  ag.ask='wait';lock(false);
+  reply(()=>{
+    bubble(c().sending);
+    sms(c().smsLoc(digits(5)));
+    const box=el('div','phone');box.append(el('b',null,c().phoneT),el('p',null,c().phoneP));
+    const go=el('button',null,c().share);go.type='button';
+    go.onclick=()=>{
+      go.disabled=true;go.textContent=c().getting;
+      const v=version;
+      setTimeout(()=>{
+        if(v!==version)return;
+        ag.d.coords=SAMPLE;ag.d.loc=SAMPLE.lat.toFixed(4)+', '+SAMPLE.lng.toFixed(4);
+        go.remove();
+        const r=el('div');r.append(el('div','ok',c().shared),el('div',null,ag.d.loc+' · '+c().acc(SAMPLE.acc)));
+        const a=el('a',null,c().maps);a.href=mapsUrl(SAMPLE);a.target='_blank';a.rel='noopener';r.append(a,el('p',null,c().sample));
+        box.append(r);scroll();
+        ag.ask='loc';
+        reply(()=>{bubble(c().gotLoc);nextAsk()});
+      },900);
+    };
+    box.append(go);$('thread').append(box);scroll();
+  });
+}
+function finish(){
+  ag.ask='done';progress(2);
+  const d=ag.d,h=new Date().getHours(),after=h<7||h>=18,rate=after?285:225,hrs=2,mi=25,id=Math.floor(100000+Math.random()*900000);
+  const lines=[[(after?c().night:c().day)+' × '+hrs,rate*hrs],[c().miles(mi),mi*2.48]];
+  const total=Math.round(lines.reduce((s,l)=>s+l[1],0)*100)/100;
+  reply(()=>{
+    bubble(c().done);
+    sms(c().smsSign(d.ph,id));
+    const box=el('section','request');
+    box.append(el('h2',null,c().order+' '+id));
+    box.append(el('div','note',[d.co,d.truck,kind(d.problem)].join(' · ')));
+    const tb=el('table');
+    lines.forEach(l=>{const tr=el('tr');tr.append(el('td',null,l[0]),el('td',null,money(l[1])));tb.append(tr)});
+    const tot=el('tr','tot');tot.append(el('td',null,c().estimate),el('td',null,money(total)));tb.append(tot);
+    box.append(tb);
+    const lp=el('p','note',c().loc+': '+d.loc);
+    if(d.coords){const a=el('a',null,c().maps);a.href=mapsUrl(d.coords);a.target='_blank';a.rel='noopener';lp.append(' · ',a)}
+    box.append(lp,el('p','note',c().priceNote(after)));
+    $('thread').append(box);progress(3);scroll();
+  });
+}
+function start(){
+  version++;clearTimeout(timer);pending=0;ag={ask:'problem',d:{}};
+  $('typing').hidden=true;$('thread').replaceChildren();$('message').value='';$('message').setCustomValidity('');
+  $('thread').append(el('div','day',c().today));
+  bubble(c().greeting);chips();progress(0);lock(false);scroll();
+}
+function setLanguage(next){if(next===lang)return;lang=next;document.documentElement.lang=lang;[['service-title','title'],['eyebrow','eyebrow'],['intro','intro'],['online-label','online'],['shop-type','type'],['no-account','account'],['help-note','help'],['demo-note','demo'],['reset','reset'],['agent-sub','agent'],['composer-hint','hint'],['typing','typing']].forEach(([id,key])=>$(id).textContent=c()[key]);c().steps.forEach((t,i)=>$('step-label-'+i).textContent=t);$('message').placeholder=c().placeholder;$('message').setAttribute('aria-label',c().message);$('send').setAttribute('aria-label',c().send);$('en').setAttribute('aria-pressed',String(lang==='en'));$('es').setAttribute('aria-pressed',String(lang==='es'));start()}
+$('composer').onsubmit=e=>{e.preventDefault();if(!$('message').value.trim()){$('message').setCustomValidity(c().empty);$('message').reportValidity();return}send($('message').value)};
+$('message').oninput=()=>$('message').setCustomValidity('');
+$('message').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('composer').requestSubmit()}};
+$('reset').onclick=()=>start();$('en').onclick=()=>setLanguage('en');$('es').onclick=()=>setLanguage('es');
+$('step-label-2').textContent=c().steps[2];$('demo-note').textContent=c().demo;$('online-label').textContent=c().online;
+start();
+})();
+</script></body></html>

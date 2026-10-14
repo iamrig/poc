@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rig, the AI agent for night-shift shops</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Barlow:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14161A}
+a{text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #F5B301;outline-offset:3px}
+.btn:hover{background:#FFD04D}
+.ghost:hover{background:#1E2126}
+.navlink:hover{color:#F5B301}
+input::placeholder{color:#9AA0A8}
+.eye{transform-box:fill-box;transform-origin:center;animation:blink 5.5s infinite}
+.dot{animation:pulse 1.8s ease-in-out infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(0.08)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+@media (prefers-reduced-motion:reduce){.eye,.dot{animation:none}}
+</style>
+</head>
+<body>
+
+
+<div style="background:#14161A;color:#F2EFE6;font-family:'Barlow',system-ui,sans-serif;font-size:18px;line-height:1.55;width:100%;overflow-x:hidden">
+
+<!-- NAV -->
+<div style="max-width:1200px;margin:0 auto;padding:20px 24px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px">
+<a href="#top" style="display:flex;align-items:center;gap:12px;color:#F2EFE6" aria-label="Rig, home">
+<svg width="44" height="44" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="9" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="143" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="9"/><rect class="eye" x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect class="eye" x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;letter-spacing:0.08em;text-transform:uppercase">Rig<span style="display:inline-block;width:8px;height:8px;background:#F5B301;margin-left:3px"></span></span>
+</a>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px 28px">
+<a class="navlink" href="#night" style="color:#C9CDD3;font-weight:500;font-size:16px;display:inline-flex;align-items:center;min-height:44px">A night with Rig</a>
+<a class="navlink" href="#plate" style="color:#C9CDD3;font-weight:500;font-size:16px;display:inline-flex;align-items:center;min-height:44px">Off your plate</a>
+<a class="navlink" href="#shops" style="color:#C9CDD3;font-weight:500;font-size:16px;display:inline-flex;align-items:center;min-height:44px">Shops</a>
+<a class="navlink" href="demo.html" style="color:#C9CDD3;font-weight:500;font-size:16px;display:inline-flex;align-items:center;min-height:44px">Demo</a>
+<a class="navlink" href="#pricing" style="color:#C9CDD3;font-weight:500;font-size:16px;display:inline-flex;align-items:center;min-height:44px">Pricing</a>
+</div>
+</div>
+
+<!-- HERO -->
+<div id="top" style="max-width:1200px;margin:0 auto;padding:64px 24px 96px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:56px">
+<div style="flex:1 1 520px;min-width:0">
+<div style="display:inline-flex;align-items:center;gap:10px;border:1px solid #3A3F47;padding:8px 16px;border-radius:999px;font-size:15px;color:#C9CDD3">
+<span class="dot" style="width:9px;height:9px;border-radius:50%;background:#F5B301"></span>
+On shift now. AI agent for the graveyard shift.
+</div>
+<h1 style="margin:28px 0 0;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;line-height:0.94;font-size:clamp(54px,9vw,120px);letter-spacing:-0.005em">Hands on the truck.<br><span style="color:#F5B301">Rig's got the clipboard.</span></h1>
+<p style="margin:28px 0 0;max-width:560px;font-size:clamp(18px,2.1vw,21px);color:#C9CDD3">Rig is an AI agent for diesel, tire, brake, electrical and tow shops that wake up for drivers in the middle of the night. It handles the manual grind, from intake to work orders to follow-ups, so your techs never put the wrench down.</p>
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:36px">
+<a class="btn" href="#access" style="display:inline-flex;align-items:center;min-height:56px;padding:0 30px;background:#F5B301;color:#14161A;font-weight:600;font-size:18px;border-radius:4px">Put Rig on the night shift</a>
+<a class="ghost" href="demo.html" style="display:inline-flex;align-items:center;min-height:56px;padding:0 30px;border:1px solid #5A606A;color:#F2EFE6;font-weight:500;font-size:18px;border-radius:4px">Watch the demo</a>
+</div>
+</div>
+
+<!-- chat -->
+<div style="flex:1 1 380px;min-width:0;background:#1E2126;border:1px solid #2E333A;border-radius:16px;padding:24px;box-sizing:border-box">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid #2E333A">
+<div style="display:flex;align-items:center;gap:12px">
+<svg width="44" height="44" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="9" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="143" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="9"/><rect class="eye" x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect class="eye" x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+<div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:0.08em;text-transform:uppercase;line-height:1.1">Rig</div>
+<div style="font-size:14px;color:#9AA0A8;line-height:1.2">Bay 2 · 3:02 AM</div>
+</div>
+</div>
+<div style="font-size:13px;color:#9AA0A8">Example</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;margin-top:20px">
+<div style="align-self:flex-start;max-width:86%;background:#2A2F37;border-radius:14px 14px 14px 4px;padding:12px 16px;font-size:16px">Reefer unit quit on me. I'm at your gate, Kenworth, plate ends 4471.</div>
+<div style="align-self:flex-end;max-width:86%;background:#F5B301;color:#14161A;border-radius:14px 14px 4px 14px;padding:12px 16px;font-size:16px;font-weight:500">Got you. Pull into bay 2. Is the unit throwing a fault code, and when did it quit?</div>
+<div style="align-self:flex-start;max-width:86%;background:#2A2F37;border-radius:14px 14px 14px 4px;padding:12px 16px;font-size:16px">Code 17. About twenty minutes ago.</div>
+<div style="align-self:flex-end;max-width:86%;background:#F5B301;color:#14161A;border-radius:14px 14px 4px 14px;padding:12px 16px;font-size:16px;font-weight:500">Logged. Work order is open and your night tech has been pinged. I'll text you the second we know more.</div>
+</div>
+</div>
+</div>
+
+<!-- STRIP -->
+<div style="background:#F5B301;color:#14161A;padding:20px 24px">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(22px,3vw,32px);text-transform:uppercase;letter-spacing:0.04em">
+<span>Diesel</span><span style="width:10px;height:10px;background:#14161A;display:inline-block"></span>
+<span>Tires</span><span style="width:10px;height:10px;background:#14161A;display:inline-block"></span>
+<span>Brakes</span><span style="width:10px;height:10px;background:#14161A;display:inline-block"></span>
+<span>Electrical</span><span style="width:10px;height:10px;background:#14161A;display:inline-block"></span>
+<span>Reefer</span><span style="width:10px;height:10px;background:#14161A;display:inline-block"></span>
+<span>Towing</span><span style="width:10px;height:10px;background:#14161A;display:inline-block"></span>
+<span>Welding</span>
+</div>
+</div>
+
+<!-- A NIGHT WITH RIG -->
+<div id="night" style="max-width:1200px;margin:0 auto;padding:104px 24px 72px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#F5B301;font-size:18px">A night with Rig</div>
+<h2 style="margin:12px 0 0;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(40px,6vw,76px);line-height:0.98;max-width:900px">One shift. Eight hours. Zero sticky notes.</h2>
+<div style="margin-top:56px">
+
+<div style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:32px 0;border-top:1px solid #2E333A">
+<div style="flex:0 0 240px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;line-height:1;color:#F5B301">10:45<span style="font-size:28px;margin-left:8px">PM</span></div>
+<div style="flex:1 1 360px;min-width:0">
+<h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:32px;line-height:1.1">Shift starts. Rig reads the handoff.</h3>
+<p style="margin:10px 0 0;color:#C9CDD3;max-width:620px">Open jobs, parts on the way, drivers waiting on a call back. Rig picks up exactly where the day crew left off.</p>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:32px 0;border-top:1px solid #2E333A">
+<div style="flex:0 0 240px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;line-height:1;color:#F5B301">12:20<span style="font-size:28px;margin-left:8px">AM</span></div>
+<div style="flex:1 1 360px;min-width:0">
+<h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:32px;line-height:1.1">A driver rolls in.</h3>
+<p style="margin:10px 0 0;color:#C9CDD3;max-width:620px">Rig greets them, gets the unit, the plate and the symptoms, and opens the work order while your tech is still pulling into the bay.</p>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:32px 0;border-top:1px solid #2E333A">
+<div style="flex:0 0 240px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;line-height:1;color:#F5B301">2:05<span style="font-size:28px;margin-left:8px">AM</span></div>
+<div style="flex:1 1 360px;min-width:0">
+<h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:32px;line-height:1.1">The part isn't on the shelf.</h3>
+<p style="margin:10px 0 0;color:#C9CDD3;max-width:620px">Rig reaches out to your suppliers and brings back what they said, so nobody sits on hold with a flashlight in their teeth.</p>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:32px 0;border-top:1px solid #2E333A">
+<div style="flex:0 0 240px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;line-height:1;color:#F5B301">3:30<span style="font-size:28px;margin-left:8px">AM</span></div>
+<div style="flex:1 1 360px;min-width:0">
+<h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:32px;line-height:1.1">The driver wants an ETA.</h3>
+<p style="margin:10px 0 0;color:#C9CDD3;max-width:620px">Rig answers from the work order, so your tech doesn't have to slide out from under the truck to say "about an hour."</p>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:32px 0;border-top:1px solid #2E333A">
+<div style="flex:0 0 240px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;line-height:1;color:#F5B301">4:50<span style="font-size:28px;margin-left:8px">AM</span></div>
+<div style="flex:1 1 360px;min-width:0">
+<h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:32px;line-height:1.1">The owner needs to know.</h3>
+<p style="margin:10px 0 0;color:#C9CDD3;max-width:620px">Rig pings the right person, and only when it matters. No more 2 a.m. "FYI" texts typed with greasy thumbs.</p>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:32px 0;border-top:1px solid #2E333A;border-bottom:1px solid #2E333A">
+<div style="flex:0 0 240px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;line-height:1;color:#F5B301">6:00<span style="font-size:28px;margin-left:8px">AM</span></div>
+<div style="flex:1 1 360px;min-width:0">
+<h3 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:32px;line-height:1.1">Day crew walks in.</h3>
+<p style="margin:10px 0 0;color:#C9CDD3;max-width:620px">A clean recap is waiting: what came in, what's done, what's still open. Coffee first, questions never.</p>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- OFF YOUR PLATE -->
+<div id="plate" style="background:#1E2126;border-top:1px solid #2E333A;border-bottom:1px solid #2E333A">
+<div style="max-width:1200px;margin:0 auto;padding:96px 24px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#F5B301;font-size:18px">Off your plate</div>
+<h2 style="margin:12px 0 0;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(40px,6vw,76px);line-height:0.98;max-width:900px">Cross it off the list.</h2>
+<div style="margin-top:56px;display:flex;flex-wrap:wrap;gap:20px">
+
+<div style="flex:1 1 340px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:8px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;letter-spacing:0.02em;text-transform:uppercase;color:#C9CDD3;text-decoration:line-through;text-decoration-color:rgba(245,179,1,0.75);text-decoration-thickness:2px">Scribbling plates and symptoms on a shop rag</div>
+<div style="display:flex;align-items:center;gap:10px;color:#F5B301;font-weight:600;font-size:16px">
+<svg width="28" height="28" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+Rig takes the intake
+</div>
+</div>
+
+<div style="flex:1 1 340px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:8px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;letter-spacing:0.02em;text-transform:uppercase;color:#C9CDD3;text-decoration:line-through;text-decoration-color:rgba(245,179,1,0.75);text-decoration-thickness:2px">Retyping the same info into three places</div>
+<div style="display:flex;align-items:center;gap:10px;color:#F5B301;font-weight:600;font-size:16px">
+<svg width="28" height="28" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+Rig writes it once, right
+</div>
+</div>
+
+<div style="flex:1 1 340px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:8px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;letter-spacing:0.02em;text-transform:uppercase;color:#C9CDD3;text-decoration:line-through;text-decoration-color:rgba(245,179,1,0.75);text-decoration-thickness:2px">Texting the owner at 2 a.m.</div>
+<div style="display:flex;align-items:center;gap:10px;color:#F5B301;font-weight:600;font-size:16px">
+<svg width="28" height="28" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+Rig sends the heads-up
+</div>
+</div>
+
+<div style="flex:1 1 340px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:8px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;letter-spacing:0.02em;text-transform:uppercase;color:#C9CDD3;text-decoration:line-through;text-decoration-color:rgba(245,179,1,0.75);text-decoration-thickness:2px">Sitting on hold with a parts house</div>
+<div style="display:flex;align-items:center;gap:10px;color:#F5B301;font-weight:600;font-size:16px">
+<svg width="28" height="28" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+Rig chases the part
+</div>
+</div>
+
+<div style="flex:1 1 340px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:8px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;letter-spacing:0.02em;text-transform:uppercase;color:#C9CDD3;text-decoration:line-through;text-decoration-color:rgba(245,179,1,0.75);text-decoration-thickness:2px">Answering "how much longer?" from under a truck</div>
+<div style="display:flex;align-items:center;gap:10px;color:#F5B301;font-weight:600;font-size:16px">
+<svg width="28" height="28" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+Rig keeps the driver posted
+</div>
+</div>
+
+<div style="flex:1 1 340px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:8px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:30px;line-height:1.25;letter-spacing:0.02em;text-transform:uppercase;color:#C9CDD3;text-decoration:line-through;text-decoration-color:rgba(245,179,1,0.75);text-decoration-thickness:2px">Writing the shift recap on zero sleep</div>
+<div style="display:flex;align-items:center;gap:10px;color:#F5B301;font-weight:600;font-size:16px">
+<svg width="28" height="28" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+Rig hands over the recap
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- SHOPS -->
+<div id="shops" style="max-width:1200px;margin:0 auto;padding:104px 24px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#F5B301;font-size:18px">Every bay, every trade</div>
+<h2 style="margin:12px 0 0;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(40px,6vw,76px);line-height:0.98;max-width:900px">If a driver can show up at 3 a.m., Rig can help.</h2>
+<div style="margin-top:56px;display:flex;flex-wrap:wrap;gap:16px">
+
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 01</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Diesel repair</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 02</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Tires</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 03</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Brakes &amp; suspension</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 04</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Electrical</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 05</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Reefer &amp; A/C</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 06</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Towing &amp; roadside</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 07</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Welding &amp; fab</div>
+</div>
+<div style="flex:1 1 250px;min-width:0;border:2px solid #F2EFE6;border-radius:6px;padding:20px 22px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:0.12em;color:#F5B301;text-transform:uppercase">Bay 08</div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1.05;text-transform:uppercase;margin-top:6px">Mobile mechanics</div>
+</div>
+
+</div>
+</div>
+
+<!-- PRICING -->
+<div id="pricing" style="background:#1E2126;border-top:1px solid #2E333A;border-bottom:1px solid #2E333A">
+<div style="max-width:1200px;margin:0 auto;padding:104px 24px;box-sizing:border-box">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#F5B301;font-size:18px">Pricing</div>
+<h2 style="margin:12px 0 0;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(40px,6vw,76px);line-height:0.98;max-width:900px">Two ways to hire Rig.</h2>
+<p style="margin:20px 0 0;max-width:600px;color:#C9CDD3;font-size:20px">Same agent, same night shift. Rig Jr. works every chat; Rig Sr. also picks up the phone.</p>
+
+<div style="margin-top:56px;display:flex;flex-wrap:wrap;gap:24px;align-items:stretch">
+
+<!-- JR -->
+<div style="flex:1 1 420px;min-width:0;background:#14161A;border:1px solid #2E333A;border-radius:12px;padding:36px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:16px">
+<svg width="56" height="56" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="9" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="143" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="9"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+<div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1;text-transform:uppercase;letter-spacing:0.04em">Rig Jr.</div>
+<div style="color:#C9CDD3;font-size:17px;margin-top:4px">Your first night-shift hand.</div>
+</div>
+</div>
+<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px">
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:84px;line-height:0.9;color:#F5B301">$299</span>
+<span style="color:#9AA0A8;font-size:16px">per month, per shop</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#9AA0A8;font-size:16px">Where drivers reach Rig</div><div style="display:flex;flex-wrap:wrap;gap:8px"><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;color:#F2EFE6">Text message</span><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;color:#F2EFE6">WhatsApp</span><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;color:#F2EFE6">Web chat</span></div></div>
+<a class="ghost" href="#access" style="display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 30px;border:1px solid #5A606A;color:#F2EFE6;font-weight:600;font-size:18px;border-radius:4px">Start with Rig Jr.</a>
+<div style="border-top:1px solid #2E333A;padding-top:24px;display:flex;flex-direction:column;gap:14px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#9AA0A8;font-size:16px">What's in it</div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Answers drivers by text message, WhatsApp and your own web chat, around the clock, in English or Spanish</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Takes the intake and creates the work order in RoadSync, then sends it to the driver to sign</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Texts the tech once it's signed, and builds the invoice when the tech says it's done</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Sends the invoice and follows the payment until it clears</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Keeps the driver posted, straight from the work order</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Texts the owner only when something needs an OK</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>End-of-shift recap for the day crew</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Plug-and-play RoadSync connection: connect your account in minutes and go live the same night. No setup fee</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>1 shop location</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>200 driver conversations a month, then $1.50 each</span></div>
+</div>
+</div>
+
+<!-- SR -->
+<div style="flex:1 1 420px;min-width:0;background:#14161A;border:2px solid #F5B301;border-radius:12px;padding:35px;box-sizing:border-box;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+<div style="display:flex;align-items:center;gap:16px">
+<svg width="56" height="56" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="9" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="143" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="22" y="42" width="116" height="100" rx="24" fill="#F5B301"/><rect x="48" y="66" width="14" height="24" rx="7" fill="#14161A"/><rect x="98" y="66" width="14" height="24" rx="7" fill="#14161A"/><rect x="48" y="100" width="64" height="8" rx="4" fill="#14161A"/><rect x="48" y="114" width="64" height="8" rx="4" fill="#14161A"/></svg>
+<div>
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1;text-transform:uppercase;letter-spacing:0.04em">Rig Sr.</div>
+<div style="color:#C9CDD3;font-size:17px;margin-top:4px">Runs the whole night, phone included.</div>
+</div>
+</div>
+<div style="background:#F5B301;color:#14161A;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;font-size:16px;padding:6px 14px;border-radius:999px">The full crew</div>
+</div>
+<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px">
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:84px;line-height:0.9;color:#F5B301">$799</span>
+<span style="color:#9AA0A8;font-size:16px">per month, per shop</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#9AA0A8;font-size:16px">Where drivers reach Rig</div><div style="display:flex;flex-wrap:wrap;gap:8px"><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;color:#F2EFE6">Text message</span><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;color:#F2EFE6">WhatsApp</span><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;color:#F2EFE6">Web chat</span><span style="display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid #5A606A;border-radius:999px;font-size:15px;font-weight:600;background:#F5B301;color:#14161A;border-color:#F5B301">Phone calls · voice</span></div></div>
+<a class="btn" href="#access" style="display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 30px;background:#F5B301;color:#14161A;font-weight:600;font-size:18px;border-radius:4px">Go with Rig Sr.</a>
+<div style="border-top:1px solid #2E333A;padding-top:24px;display:flex;flex-direction:column;gap:14px">
+<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#9AA0A8;font-size:16px">Everything in Jr., plus</div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Answers the shop phone: a voice assistant that talks with drivers, in English or Spanish</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Takes the intake on the call, then texts the work order to sign and, later, the invoice</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Chases parts with your suppliers and reports back</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Reads the day crew's handoff at shift start</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Custom workflows built around how your shop runs</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Multiple locations and bays</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Unlimited text, WhatsApp and chat conversations</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>1,000 voice minutes a month, then $0.25 a minute</span></div>
+<div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:0 0 10px;width:10px;height:10px;background:#F5B301;margin-top:9px"></span><span>Priority support</span></div>
+</div>
+</div>
+
+</div>
+<p style="margin:28px 0 0;color:#9AA0A8;font-size:15px">Prices in USD, per shop, per month. No setup fee. Each extra location is +50% of the plan. Pay yearly and get 2 months free.</p>
+</div>
+</div>
+
+<!-- GET PAID BAND -->
+<div style="background:#F5B301;color:#14161A">
+<div style="max-width:1200px;margin:0 auto;padding:56px 24px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:16px 56px">
+<div style="flex:1 1 380px;min-width:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(34px,5vw,60px);line-height:0.98;text-transform:uppercase">No more trucks leaving without paying.</div>
+<div style="flex:1 1 320px;min-width:0;font-size:20px;font-weight:500">Rig sends the invoice, answers the driver’s questions about it, and stays on it until RoadSync says paid.</div>
+</div>
+</div>
+
+<!-- CTA -->
+<div id="access" style="max-width:1200px;margin:0 auto;padding:112px 24px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:56px">
+<div style="flex:0 0 auto;margin:0 auto">
+<svg width="260" height="260" viewBox="0 0 160 160" role="img" aria-label="Rig, the night-shift bot"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="9" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="143" y="74" width="9" height="34" rx="4.5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="9"/><rect class="eye" x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect class="eye" x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+</div>
+<div style="flex:1 1 420px;min-width:0">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(44px,7vw,92px);line-height:0.95">Put Rig on tonight's shift.</h2>
+<p style="margin:20px 0 0;max-width:520px;color:#C9CDD3;font-size:20px">We're onboarding a small group of night-shift shops. Leave your email and we'll reach out.</p>
+<form style="margin-top:32px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;max-width:560px">
+<div style="flex:1 1 240px;display:flex;flex-direction:column;gap:6px">
+<label for="em" style="font-size:15px;color:#C9CDD3">Work email</label>
+<input id="em" type="email" placeholder="you@yourshop.com" style="height:56px;box-sizing:border-box;padding:0 16px;background:#1E2126;border:1px solid #5A606A;border-radius:4px;color:#F2EFE6;font-family:inherit;font-size:18px;width:100%">
+</div>
+<button type="button" class="btn" style="height:56px;padding:0 28px;background:#F5B301;color:#14161A;border:0;border-radius:4px;font-family:inherit;font-weight:600;font-size:18px;cursor:pointer">Get early access</button>
+</form>
+</div>
+</div>
+
+<!-- FOOTER -->
+<div style="border-top:1px solid #2E333A">
+<div style="max-width:1200px;margin:0 auto;padding:32px 24px 48px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 32px">
+<div style="display:flex;align-items:center;gap:10px">
+<svg width="32" height="32" viewBox="0 0 160 160" aria-hidden="true"><path d="M54 46 V20 M106 46 V20" stroke="#F5B301" stroke-width="10" stroke-linecap="round" fill="none"/><rect x="8" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="142" y="74" width="10" height="34" rx="5" fill="#F5B301"/><rect x="26" y="46" width="108" height="92" rx="22" fill="none" stroke="#F5B301" stroke-width="10"/><rect x="51" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="95" y="68" width="14" height="24" rx="7" fill="#F2EFE6"/><rect x="50" y="102" width="60" height="9" rx="4.5" fill="#F2EFE6"/><rect x="50" y="116" width="60" height="9" rx="4.5" fill="#F2EFE6"/></svg>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;letter-spacing:0.08em;text-transform:uppercase">Rig<span style="display:inline-block;width:6px;height:6px;background:#F5B301;margin-left:2px"></span></span>
+</div>
+<div style="font-size:15px;color:#9AA0A8">AI agent for shops that work the night shift · 2026</div>
+</div>
+</div>
+
+</div>
+
+
+</body>
+</html>

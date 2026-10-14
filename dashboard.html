@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rig Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Mock-up of Truckmasters' dashboard for Rig, its virtual night dispatcher.
+   Rig takes the driver's details, creates the work order in RoadSync, sends it for signature, texts the tech,
+   builds the invoice from the shop's rate card once the tech says it's done, sends it, and follows the payment
+   until RoadSync confirms it. Rig never sees a money code: the driver pays on RoadSync's page.
+   Three sections: Tonight, Jobs, Rig settings. Same tokens as demo.html. */
+:root{
+  --bg:#14161A; --surface:#1E2126; --surface-2:#262A31; --line:#2E333A;
+  --text:#F2EFE6; --muted:#A7ADB5;
+  --amber:#F5B301; --on-amber:#14161A; --amber-ink:#F5B301; --mark:#F5B301;
+  --bubble-in:#2F353E; --ok:#5CC48D; --no:#E88A7A;
+  --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:ui-monospace,'Cascadia Mono',Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F2EFE6; --surface:#FBF9F3; --surface-2:#E8E3D6; --line:#D6D0C1;
+    --text:#14161A; --muted:#565C65;
+    --amber:#F5B301; --on-amber:#14161A; --amber-ink:#8F5D00; --mark:#B87800;
+    --bubble-in:#E1DCCD; --ok:#1E7A4C; --no:#A8402F;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F2EFE6; --surface:#FBF9F3; --surface-2:#E8E3D6; --line:#D6D0C1;
+  --text:#14161A; --muted:#565C65;
+  --amber:#F5B301; --on-amber:#14161A; --amber-ink:#8F5D00; --mark:#B87800;
+  --bubble-in:#E1DCCD; --ok:#1E7A4C; --no:#A8402F;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:400 16px/1.5 var(--body);-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+[hidden]{display:none !important}
+a{color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+/* shell */
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 16px}
+.brand-name{font:800 28px/1 var(--display);letter-spacing:.08em;text-transform:uppercase}
+.brand-name i{display:inline-block;width:7px;height:7px;background:var(--amber);margin-left:3px}
+.shopname{padding:0 8px 16px;margin-bottom:8px;border-bottom:1px solid var(--line);line-height:1.25}
+.shopname b{display:block;font-weight:600}
+.shopname span{font-size:13px;color:var(--muted)}
+.nav{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;align-items:center;gap:12px;min-height:46px;padding:0 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:500}
+.nav a:hover{background:var(--surface-2);color:var(--text)}
+.nav a[aria-current="page"]{background:var(--surface-2);color:var(--text);font-weight:600;box-shadow:inset 3px 0 0 var(--amber)}
+.nav svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.badge{margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--amber);color:var(--on-amber);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.side-foot{margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.me{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex:0 0 34px}
+.me div{line-height:1.2;font-size:14px}
+.me small{color:var(--muted)}
+.mobilebar{display:none}
+.scrim{display:none}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;inset:0 auto 0 0;width:min(84vw,300px);z-index:30;transform:translateX(-100%);transition:transform .2s ease}
+  .app.open .side{transform:none}
+  .app.open .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25}
+  .mobilebar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:10}
+  .mobilebar .brand-name{font-size:24px}
+}
+.main{min-width:0;padding:18px 24px 48px}
+@media (max-width:600px){.main{padding:14px 16px 40px}}
+
+.btn{min-height:44px;padding:0 18px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:inherit}
+.btn:hover:not(:disabled){background:var(--surface-2)}
+.btn.primary{background:var(--amber);color:var(--on-amber);border-color:var(--amber)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);background:var(--amber)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:default}
+.iconbtn{width:44px;height:44px;border:1px solid var(--line);border-radius:6px;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 44px}
+.iconbtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+/* status bar + demo controls */
+.agent{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.agent-on{display:flex;align-items:center;gap:10px;font-weight:600}
+.live{width:10px;height:10px;border-radius:50%;background:var(--ok);animation:live 2s infinite;flex:0 0 10px}
+.doing{flex:1 1 280px;min-width:0;display:flex;align-items:center;gap:10px;color:var(--muted)}
+.doing b{color:var(--text);font-weight:500}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--amber);animation:spin .9s linear infinite;flex:0 0 16px}
+.doing.idle .spin{animation:none;border-top-color:var(--line)}
+.clockbox{display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap}
+.clock{font:800 28px/1 var(--display);font-variant-numeric:tabular-nums}
+.demo-tag{font:700 11px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line);border-radius:4px;padding:4px 6px}
+
+.vhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px;margin:22px 0 16px}
+.vhead h1{margin:0;font:800 clamp(32px,4vw,44px)/1 var(--display);text-transform:uppercase}
+.vhead p{margin:6px 0 0;color:var(--muted);max-width:72ch}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.panel h2{margin:0 0 14px;font:700 15px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px}
+.panel h2 small{font:500 14px/1.3 var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.s12{grid-column:span 12}.s6{grid-column:span 6}
+@media (max-width:1100px){.s6{grid-column:span 12}}
+.empty{margin:0;color:var(--muted)}
+
+/* needs you */
+.needs{border:2px solid var(--amber-ink)}
+.needs h2{color:var(--amber-ink)}
+.ask{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px}
+.ask + .ask{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.ask-q{flex:1 1 360px;min-width:0}
+.ask-q p{margin:0;font-size:18px;font-weight:500}
+.ask-q small{display:block;margin-top:4px;color:var(--muted);font-size:14px}
+.ask-btns{display:flex;flex-wrap:wrap;gap:10px}
+
+/* money */
+.money{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:800px){.money{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.tile-n{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.tile-l{margin-top:6px;font-size:14px;color:var(--muted);line-height:1.3}
+.tile.warn .tile-n{color:var(--amber-ink)}
+.tile.ok .tile-n{color:var(--ok)}
+
+/* board */
+.board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:1100px){.board{grid-template-columns:repeat(5,minmax(220px,1fr));overflow-x:auto;padding-bottom:6px}}
+.col-h{display:flex;align-items:center;justify-content:space-between;font:700 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 2px 10px}
+.col-h span:last-child{font:600 13px/1 var(--body);letter-spacing:0}
+.colbody{display:flex;flex-direction:column;gap:10px;min-height:60px}
+.colbody:empty::before{content:"—";color:var(--muted);padding:8px 2px}
+.card{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);cursor:pointer;color:inherit}
+.card:hover{border-color:var(--amber-ink)}
+.card.flag{border-color:var(--amber-ink);box-shadow:inset 3px 0 0 var(--amber)}
+.card .wo{font-size:13px}
+.card b{display:block;font-weight:600;margin-top:2px}
+.card .c-m{font-size:13px;color:var(--muted)}
+.card .c-s{margin-top:8px;font-size:13px;font-weight:600}
+.card.flag .c-s{color:var(--amber-ink)}
+.card .c-s.ok{color:var(--ok)}
+.card .c-s.no{color:var(--no)}
+.new{animation:pop .35s ease-out}
+
+/* feed / steps */
+.steps{list-style:none;margin:0;padding:0}
+.steps li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:2px 12px;padding:10px 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0;padding-top:0}
+.s-time{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.s-body{min-width:0}
+.s-kind{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.s-kind i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:0 0 8px}
+.s-kind[data-k="in"] i{background:var(--text)}
+.s-kind[data-k="think"] i{background:transparent;border:2px solid var(--amber)}
+.s-kind[data-k="act"] i{background:var(--amber)}
+.s-kind[data-k="ask"]{color:var(--amber-ink)}
+.s-kind[data-k="ask"] i{background:var(--amber);border-radius:2px}
+.s-kind[data-k="wait"] i{background:transparent;border:2px dashed var(--muted)}
+.s-kind[data-k="person"] i{background:var(--ok)}
+.s-kind[data-k="event"] i{background:var(--ok);border-radius:2px}
+.s-kind[data-k="fail"]{color:var(--no)}
+.s-kind[data-k="fail"] i{background:var(--no);border-radius:2px}
+.tool{font:500 12px/1 var(--mono);letter-spacing:0;text-transform:none;padding:4px 7px;border-radius:4px;background:var(--surface-2);color:var(--text);border:1px solid var(--line)}
+.s-text{margin-top:4px;overflow-wrap:anywhere}
+.k-think .s-text{color:var(--muted);font-style:italic}
+.s-where{font-size:13px;margin-top:2px;color:var(--muted)}
+.wo{color:var(--amber-ink);font-weight:600}
+a.wo{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.techtoggle{display:inline-flex;align-items:center;gap:8px;font:500 13px/1 var(--body);letter-spacing:0;text-transform:none;color:var(--muted);cursor:pointer}
+.techtoggle input{width:18px;height:18px;accent-color:var(--amber);margin:0}
+
+/* jobs */
+.inbox{display:grid;grid-template-columns:280px minmax(0,1fr) 360px;border:1px solid var(--line);border-radius:10px;background:var(--surface);height:calc(100vh - 210px);min-height:560px;overflow:hidden}
+@media (max-width:1300px){.inbox{grid-template-columns:250px minmax(0,1fr) 320px}}
+@media (max-width:1080px){
+  .inbox{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
+  .inbox.reading .threads{display:none}
+  .inbox:not(.reading) .conv,.inbox:not(.reading) .jobside{display:none}
+  .jobside{border-left:0 !important;border-top:1px solid var(--line)}
+}
+.threads{border-right:1px solid var(--line);overflow-y:auto;min-height:0}
+.threads-head{padding:12px;border-bottom:1px solid var(--line)}
+.search{width:100%;min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.th{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:12px 14px;cursor:pointer}
+.th:hover{background:var(--surface-2)}
+.th[aria-current="true"]{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--amber)}
+.th-top{display:flex;justify-content:space-between;gap:8px}
+.th-top b{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th-top span{font-size:13px;color:var(--muted);white-space:nowrap}
+.th-last{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0 6px}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;display:inline-block}
+.pill[data-tone="warn"]{background:var(--amber);color:var(--on-amber);border-color:var(--amber)}
+.pill[data-tone="wait"]{border-color:var(--amber-ink);color:var(--amber-ink)}
+.pill[data-tone="ok"]{border-color:var(--ok);color:var(--ok)}
+.pill[data-tone="no"]{border-color:var(--no);color:var(--no)}
+.pill[data-tone="idle"]{color:var(--muted)}
+
+.conv{display:flex;flex-direction:column;min-width:0;min-height:0}
+@media (max-width:1080px){.conv{height:calc(100vh - 190px);min-height:500px}}
+.conv-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.conv-head .t{min-width:0;flex:1 1 200px;line-height:1.25}
+.conv-head b{font-weight:600}
+.conv-head small{display:block;color:var(--muted);font-size:13px}
+.back{display:none}
+@media (max-width:1080px){.back{display:inline-flex}}
+.msgs{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:12px;color:var(--muted);padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.msg{max-width:min(82%,460px);display:flex;flex-direction:column;gap:3px}
+.msg .b{padding:10px 14px;border-radius:16px;line-height:1.4;overflow-wrap:anywhere;white-space:pre-line}
+.msg .meta{font-size:12px;color:var(--muted)}
+.msg.in{align-self:flex-start}
+.msg.in .b{background:var(--bubble-in);border-bottom-left-radius:4px}
+.msg.in.staffin .b{background:transparent;border:1px solid var(--muted)}
+.msg.out{align-self:flex-end;align-items:flex-end}
+.msg.out .b{background:var(--amber);color:var(--on-amber);border-bottom-right-radius:4px;font-weight:500}
+.msg.out.tostaff .b{background:var(--surface-2);color:var(--text);border:1px solid var(--amber-ink);font-weight:400}
+.msg.out.human .b{background:var(--text);color:var(--bg)}
+.sys{border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:8px;padding:8px 12px;font-size:14px;background:var(--bg)}
+.sys.fail{border-left-color:var(--no)}
+.sys b{font:700 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--ok);margin-right:8px}
+.sys.fail b{color:var(--no)}
+.sys .meta{color:var(--muted);font-size:12px;margin-left:6px}
+.note{align-self:center;font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:999px;padding:4px 12px}
+.photo{width:200px;height:120px;border-radius:12px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--bubble-in) 10px 20px);display:flex;align-items:flex-end;padding:8px;font-size:12px;color:var(--muted);border:1px solid var(--line)}
+.composer{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.composer p{margin:0;flex:1 1 220px;color:var(--muted);font-size:14px}
+.composer p b{color:var(--text);font-weight:600}
+.composer textarea{flex:1 1 260px;min-height:44px;max-height:120px;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+
+.jobside{border-left:1px solid var(--line);overflow-y:auto;padding:16px;min-height:0;display:flex;flex-direction:column;gap:22px}
+.jobside h3{margin:0 0 10px;font:700 13px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.track{list-style:none;margin:0;padding:0}
+.track li{position:relative;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;padding:0 0 12px;font-size:14px}
+.track li::before{content:"";position:absolute;left:10px;top:22px;bottom:0;width:2px;background:var(--line)}
+.track li:last-child::before{display:none}
+.track .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--surface);position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center}
+.track li.done .dot{background:var(--ok);border-color:var(--ok)}
+.track li.done .dot::after{content:"";width:8px;height:5px;border:2px solid var(--bg);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.track li.now .dot{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,179,1,.25)}
+.track li.fail .dot{border-color:var(--no);box-shadow:0 0 0 3px rgba(232,138,122,.25)}
+.track .lbl{font-weight:500}
+.track li:not(.done):not(.now) .lbl{color:var(--muted)}
+.track .lbl small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.track li.fail .lbl small{color:var(--no)}
+.track .when{font-size:12px;color:var(--muted);white-space:nowrap;padding-top:2px}
+.kv{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.kv dd.miss{color:var(--muted);font-weight:400}
+.inv{width:100%;border-collapse:collapse;font-size:14px}
+.inv td{padding:6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.inv td:last-child{text-align:right;white-space:nowrap;padding-left:10px;font-variant-numeric:tabular-nums}
+.inv tr.tot td{font-weight:700;border-bottom:0}
+.inv tr.sub td{color:var(--muted)}
+.small{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+/* settings */
+.set{display:flex;flex-direction:column}
+.set-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding:13px 0;border-top:1px solid var(--line)}
+.set-row:first-child{border-top:0;padding-top:0}
+.set-row .l{flex:1 1 240px;min-width:0}
+.set-row .l b{display:block;font-weight:600}
+.set-row .l span{display:block;font-size:14px;color:var(--muted)}
+.field{min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);min-width:0;max-width:100%}
+.switch{position:relative;width:52px;height:30px;flex:0 0 52px}
+.switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);transition:background .15s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.switch input:checked + span{background:var(--amber);border-color:var(--amber)}
+.switch input:checked + span::after{transform:translateX(22px);background:var(--on-amber)}
+.switch input:focus-visible + span{outline:3px solid var(--amber);outline-offset:2px}
+.always{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.integ{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:14px 0;border-top:1px solid var(--line)}
+.integ:first-of-type{border-top:0;padding-top:0}
+.logo{width:44px;height:44px;border-radius:8px;background:var(--surface-2);display:inline-flex;align-items:center;justify-content:center;font:800 16px/1 var(--display);flex:0 0 44px}
+.integ .l{flex:1 1 220px;min-width:0}
+.integ .l b{display:block}
+.integ .l span{font-size:14px;color:var(--muted)}
+.rates{width:100%;border-collapse:collapse;font-size:15px}
+.rates td{padding:9px 0;border-top:1px solid var(--line)}
+.rates tr:first-child td{border-top:0;padding-top:0}
+.rates td:last-child{text-align:right;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* work orders & payments tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.tablewrap table{width:100%;border-collapse:collapse;min-width:900px}
+.tablewrap th,.tablewrap td{text-align:left;padding:12px 14px;border-top:1px solid var(--line);vertical-align:top}
+.tablewrap th{border-top:0;font:700 12px/1.2 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+.tablewrap td small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.tablewrap td:first-child{white-space:nowrap}
+.tablewrap tr.click{cursor:pointer}
+.tablewrap tr.click:hover td{background:var(--surface-2)}
+.tablewrap tr.flag td:first-child{box-shadow:inset 3px 0 0 var(--amber)}
+.api{font:500 11px/1 var(--mono);color:var(--muted);margin-top:5px;display:block}
+.by-rig{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.by-rig svg{width:18px;height:18px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:transparent;cursor:pointer;font-weight:500;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--surface-2);color:var(--text);border-color:var(--amber-ink);font-weight:600}
+.chip b{margin-left:6px;font-weight:700}
+.sync{font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+.sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.rsbox{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)}
+.rsbox .kv{font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--text);color:var(--bg);padding:12px 18px;border-radius:8px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:40}
+.foot{margin-top:28px;font-size:13px;color:var(--muted)}
+.foot a{color:var(--amber-ink)}
+
+@keyframes live{0%{box-shadow:0 0 0 0 rgba(92,196,141,.6)}70%{box-shadow:0 0 0 10px rgba(92,196,141,0)}100%{box-shadow:0 0 0 0 rgba(92,196,141,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="bot" viewBox="0 0 160 160">
+    <path d="M54 46 V20 M106 46 V20" style="stroke:var(--mark)" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <rect x="8" y="74" width="9" height="34" rx="4.5" style="fill:var(--mark)"/>
+    <rect x="143" y="74" width="9" height="34" rx="4.5" style="fill:var(--mark)"/>
+    <rect x="26" y="46" width="108" height="92" rx="22" fill="none" style="stroke:var(--mark)" stroke-width="9"/>
+    <rect x="51" y="68" width="14" height="24" rx="7" style="fill:var(--text)"/>
+    <rect x="95" y="68" width="14" height="24" rx="7" style="fill:var(--text)"/>
+    <rect x="50" y="102" width="60" height="9" rx="4.5" style="fill:var(--text)"/>
+    <rect x="50" y="116" width="60" height="9" rx="4.5" style="fill:var(--text)"/>
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></symbol>
+  <symbol id="i-jobs" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+  <symbol id="i-pay" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <aside class="side" id="side" aria-label="Main menu">
+    <div class="brand"><svg width="40" height="40" aria-hidden="true"><use href="#bot"/></svg><span class="brand-name">Rig<i></i></span></div>
+    <div class="shopname"><b>Truckmasters</b><span>Night line (210) 555-0100</span></div>
+    <nav><ul class="nav" id="nav"></ul></nav>
+    <div class="side-foot">
+      <div class="me"><span class="avatar">DR</span><div>Dana Ruiz<br><small>Owner</small></div></div>
+      <a class="btn sm" href="login.html">Sign out</a>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div style="min-width:0">
+    <div class="mobilebar">
+      <button type="button" class="iconbtn" id="menu" aria-label="Open menu" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <svg width="32" height="32" aria-hidden="true"><use href="#bot"/></svg><span class="brand-name">Rig<i></i></span>
+    </div>
+
+    <div class="main">
+      <div class="agent" role="status">
+        <div class="agent-on"><span class="live" aria-hidden="true"></span>Rig is on the night shift</div>
+        <div class="doing idle" id="doing"><span class="spin" aria-hidden="true"></span><span id="doing-t"><b>Waiting for a text.</b></span></div>
+        <div class="clockbox">
+          <div class="clock" id="clock">3:50 AM</div>
+          <span class="demo-tag">Demo</span>
+          <button type="button" class="btn sm" id="skip">Skip ahead</button>
+          <button type="button" class="btn sm" id="replay">Replay</button>
+        </div>
+      </div>
+
+      <!-- TONIGHT -->
+      <section id="view-tonight" data-view>
+        <div class="vhead"><div><h1>Tonight at Truckmasters</h1><p>Rig takes the details, creates the work order in RoadSync, gets it signed, texts Marco, sends the invoice and follows the payment. It only stops you when something is outside its rules.</p></div></div>
+        <div class="grid">
+          <section class="panel s12" id="needs" aria-labelledby="needs-h">
+            <h2 id="needs-h"><span>Needs your OK</span><small id="needs-n"></small></h2>
+            <div id="needs-body"></div>
+          </section>
+          <div class="s12 money" id="money"></div>
+          <section class="panel s12" aria-labelledby="board-h">
+            <h2 id="board-h"><span>Jobs tonight</span><small>Click a job to see every text and step</small></h2>
+            <div class="board" id="board"></div>
+          </section>
+          <section class="panel s12" aria-labelledby="feed-h">
+            <h2 id="feed-h"><span>What Rig did</span><small>newest first</small></h2>
+            <ol class="steps" id="feed" aria-live="polite"></ol>
+          </section>
+        </div>
+      </section>
+
+      <!-- JOBS -->
+      <section id="view-jobs" data-view hidden>
+        <div class="vhead"><div><h1>Rig&rsquo;s jobs</h1><p>The jobs Rig is handling, one thread per job with the driver, Marco, you and RoadSync. On the right: where the job stands and every step Rig took.</p></div></div>
+        <div class="inbox" id="inbox">
+          <div class="threads">
+            <div class="threads-head"><input class="search" type="search" placeholder="Search WO, truck, driver or company" aria-label="Search jobs" id="search"></div>
+            <div id="thread-list"></div>
+          </div>
+          <div class="conv" id="conv"></div>
+          <aside class="jobside" id="jobside" aria-label="Job details"></aside>
+        </div>
+      </section>
+
+      <!-- WORK ORDERS -->
+      <section id="view-orders" data-view hidden>
+        <div class="vhead"><div><h1>Work orders</h1><p>Every work order in RoadSync, the ones Rig made and the ones your crew made. See where each one is without opening RoadSync.</p></div><span class="sync" id="sync-wo"></span></div>
+        <div class="filters" id="wo-filters" role="group" aria-label="Filter work orders"></div>
+        <div class="tablewrap"><table><thead><tr><th>WO</th><th>Truck</th><th>Who pays · driver</th><th>Work order</th><th>Invoice</th><th>Made by</th><th>Updated</th></tr></thead><tbody id="wo-body"></tbody></table></div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section id="view-payments" data-view hidden>
+        <div class="vhead"><div><h1>Payments</h1><p>Every invoice in RoadSync: sent, failed, paid and deposited. Rig only sees the last 4 digits of a code.</p></div><span class="sync" id="sync-pay"></span></div>
+        <div class="filters" id="pay-filters" role="group" aria-label="Filter payments"></div>
+        <div class="tablewrap"><table><thead><tr><th>RS TRANS#</th><th>WO · who pays</th><th>Total</th><th>Payment</th><th>Method</th><th>Deposit</th><th>Updated</th></tr></thead><tbody id="pay-body"></tbody></table></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="view-settings" data-view hidden>
+        <div class="vhead"><div><h1>Rig settings</h1><p>Where Rig gets its data, what it has to collect, and when it has to stop and ask a person.</p></div></div>
+        <div class="grid">
+          <section class="panel s6"><h2>Integrations</h2>
+            <div class="integ"><span class="logo">RS</span><div class="l"><b>RoadSync Checkout API</b><span>Work orders (create, send, signature), invoices (create, send, status) and Comchek / EFS payments. Rig checks RoadSync every minute for new statuses.</span></div><span class="pill" data-tone="ok">Connected</span></div>
+            <div class="integ"><span class="logo">PR</span><div class="l"><b>Payroad</b><span>Same flow for shops that collect with Payroad.</span></div><span class="pill" data-tone="idle">Coming soon</span></div>
+          </section>
+          <section class="panel s6"><h2><span>Rate card</span><small>Set by the owner</small></h2>
+            <table class="rates" id="rates"></table>
+            <p class="small">Rig never makes up a price. Every invoice line comes from this list or from what the tech texts back, and the tech confirms the invoice before it goes out.</p>
+          </section>
+          <section class="panel s6"><h2>What Rig collects before the work order</h2>
+            <div class="set" id="set-collect"></div>
+          </section>
+          <section class="panel s6"><h2>When Rig stops and asks a person</h2>
+            <div class="set" id="set-stops"></div>
+          </section>
+          <section class="panel s6"><h2>Night line</h2>
+            <div class="set">
+              <div class="set-row"><div class="l"><b>Number drivers text</b><span>On the gate sign and the truck stickers.</span></div><b style="font:800 26px/1 var(--display)" class="num">(210) 555-0100</b></div>
+              <div class="set-row"><div class="l"><b>Rig answers</b><span>Outside these hours, texts go to the front desk.</span></div>
+                <select class="field" aria-label="When Rig answers"><option>Night shift (10:00 PM – 6:00 AM)</option><option>After hours and weekends</option><option>24/7</option></select></div>
+            </div>
+          </section>
+          <section class="panel s6"><h2>People</h2>
+            <div class="set">
+              <div class="set-row"><div class="l"><b>Tech on shift</b><span>Rig texts them signed jobs and asks them to confirm invoices.</span></div>
+                <select class="field" aria-label="Tech on shift"><option>Marco Peña · (210) 555-0102</option><option>Luis Garza · (210) 555-0103</option></select></div>
+              <div class="set-row"><div class="l"><b>Owner</b><span>Rig texts them when something needs an OK.</span></div>
+                <select class="field" aria-label="Owner"><option>Dana Ruiz · (210) 555-0101</option></select></div>
+            </div>
+          </section>
+          <div class="s12"><button type="button" class="btn primary" id="save">Save settings</button></div>
+        </div>
+      </section>
+
+      <p class="foot">Mock-up. No AI is running and nothing is sent: drivers, companies, prices, codes and phone numbers are sample data, and RoadSync is simulated. The driver's side is a separate screen: <a href="roadservice/truckmasters/index.html">Truckmasters driver chat</a>.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function btn(label, primary, fn){ var b = el('button', 'btn' + (primary ? ' primary' : ''), label); b.type = 'button'; b.onclick = fn; return b; }
+  function pill(label, tone){ var p = el('span', 'pill', label); p.setAttribute('data-tone', tone); return p; }
+  function money(n){ return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function cents(n){ return Math.round(n * 100) / 100; }
+
+  /* ---------- shop setup (rate card and rules live in Rig settings; statuses come from RoadSync) ---------- */
+  var FEE = 0.03, PARTS_LIMIT = 300;
+  var RATES = [
+    ['Shop labor', 189, '/hr'], ['Diagnostics', 249, '/hr'], ['Roadside, day', 225, '/hr'], ['Roadside, after hours', 285, '/hr'],
+    ['Mileage', 2.48, '/mi'], ['Tire labor', 95, '/tire'], ['Storage', 65, '/day'], ['Code / check fee, paid by the customer', '3%', '']
+  ];
+  /* key, label, required */
+  var COLLECT = [
+    ['Safe', 'Is the driver safe?', true], ['Problem', 'Problem', true], ['Location', 'Location', true],
+    ['Truck', 'Truck', true], ['Unit', 'Unit #', true], ['Driver', "Driver's name", true],
+    ['Payer', 'Company that pays', true], ['Contact', 'Who gets the work order there', true], ['Photo', 'Photo', false]
+  ];
+  /* title, description, always on */
+  var STOPS = [
+    ['Every invoice', 'Marco confirms hours and parts before Rig sends it.', true],
+    ['Parts over $' + PARTS_LIMIT, 'Rig texts you and waits for a YES.', false],
+    ['A payment fails twice', 'Rig texts you so someone can call the carrier.', false],
+    ['The driver asks for a person', 'Rig hands the thread to Marco.', false],
+    ['Safety: fire, injury, crash, hazmat', 'Rig tells the driver to call 911 and calls you.', true]
+  ];
+
+  /* ---------- clock ---------- */
+  var mins = 3 * 60 + 50;
+  function clock(m){ var h = Math.floor(m / 60) % 24, mm = m % 60; return (h % 12 || 12) + ':' + (mm < 10 ? '0' : '') + mm + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  /* minutes into the night, so 10 PM sorts before 2 AM */
+  function toMin(t){ var m = /^(\d+):(\d+) (AM|PM)$/.exec(t); if (!m) return 0; var h = +m[1] % 12 + (m[3] === 'PM' ? 12 : 0); if (h >= 12) h -= 24; return h * 60 + +m[2]; }
+  function now(){ return clock(mins); }
+
+  /* ---------- jobs ----------
+     stage: intake → sign → work → invoice → paid.
+     Messages and steps carry a global seq so only the new ones animate in. */
+  var SEQ = 0, seen = -1;
+  function M(from, t, x, extra){ var o = { from: from, t: t, x: x, seq: SEQ++ }; if (extra) for (var k in extra) o[k] = extra[k]; return o; }
+  function S(k, t, x, tool){ return { k: k, t: t, x: x, tool: tool, seq: SEQ++ }; }
+  function invoice(lines){
+    var sub = cents(lines.reduce(function(a, l){ return a + l[1]; }, 0)), fee = cents(sub * FEE);
+    return { lines: lines, sub: sub, fee: fee, total: cents(sub + fee) };
+  }
+
+  var jobs = [
+    { id: 'WO-1043', title: 'Kenworth T680 · unit 31', stage: 'work', lang: 'English', phone: '(512) 555-0143',
+      ask: { q: 'Approve a $412 reefer fan motor for WO-1043?', sub: 'Marco needs it to finish the Kenworth in bay 2. It is over your $300 parts limit, so Rig texted you at 2:08 AM and is waiting.' },
+      know: { Safe: 'Yes, at the gate', Problem: 'Reefer unit quit, code 17', Location: 'Truckmasters gate', Truck: 'Kenworth T680', Unit: '31', Driver: 'Tom Baker', Payer: 'Lone Star Reefer', Contact: 'nightdesk@lonestarreefer.example', Photo: '1 photo' },
+      ms: { intake: '12:23 AM', wo: '12:24 AM', signed: '12:27 AM' },
+      msgs: [
+        M('driver', '12:20 AM', 'DOWN. reefer quit, im at your gate'),
+        M('rig', '12:20 AM', 'Truckmasters night desk, this is Rig. Are you somewhere safe? What truck is it, and the unit number?', { to: 'driver' }),
+        M('driver', '12:21 AM', 'safe. kenworth t680 unit 31. code 17 on the reefer'),
+        M('rig', '12:21 AM', 'Got it. Your name, which company is paying, and who there gets the work order?', { to: 'driver' }),
+        M('driver', '12:23 AM', 'Tom Baker. Lone Star Reefer, nightdesk@lonestarreefer.example'),
+        M('driver', '12:23 AM', '', { photo: true }),
+        M('rig', '12:24 AM', 'Here is your work order. Review it and sign before we start: roadsync.example/wo/1043', { to: 'driver' }),
+        M('payroad', '12:27 AM', 'Work order WO-1043 signed by Tom Baker.'),
+        M('rig', '12:27 AM', 'WO-1043 signed. Kenworth unit 31, reefer quit, code 17, photo attached. Bay 2.', { to: 'tech' }),
+        M('tech', '2:05 AM', 'needs a reefer fan motor, $412 at the parts house. done by 8 if it comes at 6:45'),
+        M('rig', '2:08 AM', 'Dana, WO-1043 needs a reefer fan motor, $412. That is over your $300 limit. Reply YES to approve or NO to hold.', { to: 'owner' }),
+        M('rig', '2:08 AM', 'Marco found the problem: the reefer fan motor. I am confirming the part with the shop and will text you soon.', { to: 'driver' })
+      ],
+      steps: [
+        S('in', '12:20 AM', 'Driver: reefer quit, at the gate.'),
+        S('act', '12:20 AM', 'Asked if he is safe, the truck and the unit.', 'send_sms'),
+        S('in', '12:21 AM', 'Driver: safe, Kenworth T680 unit 31, code 17.'),
+        S('act', '12:21 AM', 'Asked his name, who pays and their contact.', 'send_sms'),
+        S('in', '12:23 AM', 'Driver: Tom Baker, Lone Star Reefer, email, photo.'),
+        S('act', '12:24 AM', 'Created {WO-1043} in RoadSync and sent it for signature.', 'create_work_order'),
+        S('event', '12:27 AM', 'RoadSync: {WO-1043} signed by Tom Baker.'),
+        S('act', '12:27 AM', 'Texted Marco: signed job, bay 2.', 'notify_tech'),
+        S('in', '2:05 AM', 'Marco: needs a $412 reefer fan motor.'),
+        S('think', '2:06 AM', '$412 is over the $300 parts limit. I can’t approve it. Ask Dana and tell the driver it is being confirmed.'),
+        S('ask', '2:08 AM', 'Texted Dana: approve $412 for {WO-1043}?', 'ask_owner'),
+        S('act', '2:08 AM', 'Told the driver the part is being confirmed.', 'send_sms'),
+        S('wait', '2:08 AM', 'Waiting on Dana.')
+      ] },
+
+    { id: 'WO-1042', title: 'Freightliner Cascadia · unit 507', stage: 'invoice', lang: 'Spanish', phone: '(956) 555-0187',
+      know: { Safe: 'Sí, patio de enfrente', Problem: 'Frenos pegados, lado derecho', Location: 'Truckmasters front lot', Truck: 'Freightliner Cascadia', Unit: '507', Driver: 'Javier Soto', Payer: 'Rodríguez Logistics', Contact: 'Dispatch (956) 555-0190', Photo: '1 photo' },
+      ms: { intake: '12:41 AM', wo: '12:42 AM', signed: '12:46 AM', done: '3:15 AM', approved: '3:18 AM', sent: '3:20 AM' },
+      inv: invoice([['Shop labor · 2.5 h', 472.5], ['Brake chamber', 186]]),
+      pay: { status: 'waiting' },
+      msgs: [
+        M('driver', '12:35 AM', 'Buenas, se me están pegando los frenos del lado derecho'),
+        M('rig', '12:35 AM', 'Buenas noches, le atiende Rig del turno de noche de Truckmasters. ¿Está en un lugar seguro? ¿Qué camión es y qué número de unidad?', { to: 'driver' }),
+        M('driver', '12:37 AM', 'Si, en el patio de enfrente. Freightliner Cascadia unidad 507'),
+        M('rig', '12:37 AM', 'Gracias. ¿Su nombre, y qué compañía paga la reparación? ¿Me manda una foto del freno?', { to: 'driver' }),
+        M('driver', '12:40 AM', 'Javier Soto, Rodríguez Logistics. dispatch 956 555 0190'),
+        M('driver', '12:40 AM', '', { photo: true }),
+        M('rig', '12:42 AM', 'Aquí está su orden de trabajo. Revísela y fírmela antes de empezar: roadsync.example/wo/1042', { to: 'driver' }),
+        M('payroad', '12:46 AM', 'Work order WO-1042 signed by Javier Soto.'),
+        M('rig', '12:46 AM', 'WO-1042 signed. Freightliner unit 507, brakes dragging right side, photo attached. Bay 1.', { to: 'tech' }),
+        M('tech', '3:15 AM', 'done. 2.5 hrs, brake chamber 186'),
+        M('rig', '3:16 AM', 'Invoice WO-1042: shop labor 2.5 h $472.50, brake chamber $186.00. Subtotal $658.50. Send it? Reply YES or tell me what to change.', { to: 'tech' }),
+        M('tech', '3:18 AM', 'yes'),
+        M('rig', '3:20 AM', 'Su camión está listo. Factura: $658.50, o $678.26 con código Comchek o EFS (cargo de 3%). Pague aquí: roadsync.example/i/1042\nPídale a su dispatch un código por el total exacto.', { to: 'driver' }),
+        M('driver', '3:44 AM', 'ya le pedi el codigo a mi dispatcher, estoy esperando')
+      ],
+      steps: [
+        S('in', '12:35 AM', 'Driver (Spanish): brakes dragging, right side.'),
+        S('think', '12:35 AM', 'He writes in Spanish. Ask about safety, truck and unit first.'),
+        S('act', '12:35 AM', 'Asked if he is safe, the truck and the unit, in Spanish.', 'send_sms'),
+        S('in', '12:37 AM', 'Driver: safe, Freightliner Cascadia unit 507.'),
+        S('act', '12:37 AM', 'Asked his name, who pays, and a photo.', 'send_sms'),
+        S('in', '12:40 AM', 'Driver: Javier Soto, Rodríguez Logistics, dispatch phone, photo.'),
+        S('act', '12:42 AM', 'Created {WO-1042} in RoadSync and sent it for signature.', 'create_work_order'),
+        S('event', '12:46 AM', 'RoadSync: {WO-1042} signed by Javier Soto.'),
+        S('act', '12:46 AM', 'Texted Marco: signed job, bay 1, photo.', 'notify_tech'),
+        S('in', '3:15 AM', 'Marco: done, 2.5 hrs, brake chamber $186.'),
+        S('act', '3:16 AM', 'Drafted the invoice from the rate card: $658.50. Asked Marco to confirm.', 'create_invoice'),
+        S('in', '3:18 AM', 'Marco: yes.'),
+        S('act', '3:20 AM', 'Sent the invoice in Spanish: $678.26 with a code. Told him to ask for the exact total.', 'send_invoice'),
+        S('in', '3:44 AM', 'Driver: waiting on his dispatcher for the code.'),
+        S('wait', '3:44 AM', 'Waiting for the payment. Rig checks in again at 4:15 AM.')
+      ] },
+
+    { id: 'WO-1041', title: 'International LT · unit 88', stage: 'paid', lang: 'English', phone: '(210) 555-0122',
+      know: { Safe: 'Yes, front lot', Problem: 'Tire pressure light', Location: 'Truckmasters front lot', Truck: 'International LT', Unit: '88', Driver: 'Luis Ortega', Payer: 'Rio Freight', Contact: 'breakdown@riofreight.example', Photo: 'Skipped' },
+      ms: { intake: '10:58 PM', wo: '10:59 PM', signed: '11:01 PM', done: '11:30 PM', approved: '11:31 PM', sent: '11:32 PM', paid: '11:45 PM', deposit: 'Today 6:00 AM' },
+      inv: invoice([['Shop labor · 1 h', 189], ['Valve stem', 24]]),
+      pay: { status: 'paid', last4: '5521', auth: 'A39001' },
+      msgs: [
+        M('driver', '10:55 PM', 'tire pressure light keeps coming on. in your front lot'),
+        M('rig', '10:55 PM', 'Truckmasters night desk, this is Rig. Are you parked somewhere safe? What truck is it, and the unit number?', { to: 'driver' }),
+        M('driver', '10:57 PM', 'safe. international LT unit 88. Luis Ortega, Rio Freight pays'),
+        M('rig', '10:57 PM', 'Thanks Luis. Who at Rio Freight should get the work order? An email or phone works.', { to: 'driver' }),
+        M('driver', '10:58 PM', 'breakdown@riofreight.example'),
+        M('rig', '10:59 PM', 'Here is your work order. Review it and sign before we start: roadsync.example/wo/1041', { to: 'driver' }),
+        M('payroad', '11:01 PM', 'Work order WO-1041 signed by Luis Ortega.'),
+        M('rig', '11:01 PM', 'WO-1041 signed. International LT unit 88, tire pressure light, front lot. Bay 3 is free.', { to: 'tech' }),
+        M('tech', '11:30 PM', 'done. 1 hr, replaced valve stem'),
+        M('rig', '11:31 PM', 'Invoice WO-1041: shop labor 1 h $189.00, valve stem $24.00. Subtotal $213.00. Send it? Reply YES or tell me what to change.', { to: 'tech' }),
+        M('tech', '11:31 PM', 'yes'),
+        M('rig', '11:32 PM', 'Your truck is ready. Invoice: $213.00, or $219.39 with a Comchek or EFS code (3% fee). Pay here: roadsync.example/i/1041', { to: 'driver' }),
+        M('payroad', '11:45 PM', 'Paid $219.39 · Comchek code ••••5521 · auth A39001. Receipt sent to the driver.'),
+        M('rig', '11:45 PM', 'Payment received, thanks Luis. Your receipt is on its way. Safe trip.', { to: 'driver' })
+      ],
+      steps: [
+        S('in', '10:55 PM', 'Driver: tire pressure light, front lot.'),
+        S('act', '10:55 PM', 'Asked if he is safe, the truck and the unit.', 'send_sms'),
+        S('in', '10:57 PM', 'Driver: safe, International LT unit 88, Luis Ortega, Rio Freight pays.'),
+        S('act', '10:57 PM', 'Asked who at Rio Freight gets the work order.', 'send_sms'),
+        S('think', '10:58 PM', 'Everything required is in. The photo is optional; skip it.'),
+        S('act', '10:59 PM', 'Created {WO-1041} in RoadSync and sent it for signature.', 'create_work_order'),
+        S('event', '11:01 PM', 'RoadSync: {WO-1041} signed by Luis Ortega.'),
+        S('act', '11:01 PM', 'Texted Marco: signed job, bay 3.', 'notify_tech'),
+        S('in', '11:30 PM', 'Marco: done, 1 hr, valve stem.'),
+        S('act', '11:31 PM', 'Drafted the invoice from the rate card: $213.00. Asked Marco to confirm.', 'create_invoice'),
+        S('in', '11:31 PM', 'Marco: yes.'),
+        S('act', '11:32 PM', 'Sent the invoice to Luis: $219.39 with a code.', 'send_invoice'),
+        S('event', '11:45 PM', 'RoadSync: paid $219.39 · Comchek ••••5521.'),
+        S('act', '11:45 PM', 'Thanked Luis and closed the job. Paid before midnight, so it goes in today’s 6:00 AM deposit.', 'send_sms')
+      ] }
+  ];
+  function job(id){ return jobs.filter(function(j){ return j.id === id; })[0]; }
+
+  /* ---------- labels ---------- */
+  var STAGES = [['intake', 'Taking details'], ['sign', 'Waiting for signature'], ['work', 'In work'], ['invoice', 'Invoice'], ['paid', 'Paid']];
+  var TRACK = [
+    ['intake', 'Details collected', 'Safety, truck, driver, who pays'],
+    ['wo', 'Work order created', 'In RoadSync'],
+    ['signed', 'Signed by the driver', 'No signature, no work'],
+    ['done', 'Work done', 'Marco texts hours and parts'],
+    ['approved', 'Invoice confirmed', 'Marco replies YES'],
+    ['sent', 'Invoice sent', 'Payment link by text'],
+    ['paid', 'Paid', 'RoadSync confirms the code'],
+    ['deposit', 'Deposit', 'Paid before midnight: 6:00 AM next morning']
+  ];
+  var KIND = { in: 'Read a text', think: 'Decided', act: 'Did', wait: 'Waiting', ask: 'Asked a person', person: 'A person stepped in', event: 'RoadSync', fail: 'RoadSync' };
+  function status(j){
+    if (j.stage === 'intake') return { t: 'Rig is collecting the details', tone: 'idle' };
+    if (j.stage === 'sign') return { t: 'Sent ' + j.ms.wo + ' · not signed yet', tone: 'wait' };
+    if (j.stage === 'work') return j.ask ? { t: 'Waiting on your OK for a part', tone: 'warn', flag: true } : { t: 'Signed · Marco is on it', tone: 'idle' };
+    if (j.stage === 'invoice'){
+      if (!j.ms.approved) return { t: 'Waiting on Marco to confirm', tone: 'wait' };
+      if (j.pay && j.pay.status === 'failed') return { t: 'Payment failed · Rig is on it', tone: 'no', flag: true };
+      return { t: 'Sent · waiting for the code', tone: 'wait' };
+    }
+    return { t: 'Paid ' + money(j.inv.total) + ' · deposit ' + j.ms.deposit.replace(/^T/, 't'), tone: 'ok' };
+  }
+
+  /* ---------- nav ---------- */
+  var NAV = [{ id: 'tonight', label: 'Tonight', icon: 'i-home' }, { id: 'jobs', label: 'Rig’s jobs', icon: 'i-msg' }, { id: 'orders', label: 'Work orders', icon: 'i-jobs' }, { id: 'payments', label: 'Payments', icon: 'i-pay' }, { id: 'settings', label: 'Rig settings', icon: 'i-gear' }];
+  var current = 'tonight', openId = 'WO-1043', userPicked = false;
+  function asks(){ return jobs.filter(function(j){ return j.ask; }); }
+  function renderNav(){
+    var ul = $('nav'); ul.textContent = '';
+    NAV.forEach(function(n){
+      var li = el('li'), a = el('a'); a.href = '#' + n.id;
+      if (n.id === current) a.setAttribute('aria-current', 'page');
+      a.innerHTML = '<svg aria-hidden="true"><use href="#' + n.icon + '"/></svg>';
+      a.appendChild(el('span', null, n.label));
+      var b = n.id === 'tonight' ? asks().length : n.id === 'jobs' ? jobs.filter(function(j){ return status(j).flag; }).length
+        : n.id === 'payments' ? records().filter(function(r){ return r.inv === 'failed'; }).length : 0;
+      if (b) a.appendChild(el('span', 'badge', String(b)));
+      li.appendChild(a); ul.appendChild(li);
+    });
+  }
+  function go(id){
+    var m = /^job\/(WO-\d+)$/.exec(id);
+    if (m && job(m[1])){ openId = m[1]; userPicked = true; id = 'jobs'; $('inbox').classList.add('reading'); renderJobs(); }
+    if (!NAV.some(function(n){ return n.id === id; })) id = 'tonight';
+    current = id;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function(v){ v.hidden = v.id !== 'view-' + id; });
+    renderNav(); closeMenu(); window.scrollTo(0, 0);
+    if (id === 'jobs') scrollJob(true);
+  }
+  window.addEventListener('hashchange', function(){ go(location.hash.slice(1)); });
+  function closeMenu(){ $('app').classList.remove('open'); $('menu').setAttribute('aria-expanded', 'false'); }
+  $('menu').onclick = function(){ $('app').classList.add('open'); $('menu').setAttribute('aria-expanded', 'true'); };
+  $('scrim').onclick = closeMenu;
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeMenu(); });
+
+  /* ---------- shared ---------- */
+  function woLink(id){ var a = el('a', 'wo', id); a.href = '#job/' + id; return a; }
+  function rich(node, x){
+    x.split(/(\{WO-\d+\})/).forEach(function(p){
+      var m = p.match(/^\{(WO-\d+)\}$/);
+      if (m) node.appendChild(woLink(m[1])); else if (p) node.appendChild(document.createTextNode(p));
+    });
+  }
+  var technical = false;
+  function stepLi(s, j){
+    var li = el('li', 'k-' + s.k + (s.seq > seen ? ' new' : ''));
+    li.appendChild(el('span', 's-time', s.t));
+    var b = el('div', 's-body'), k = el('div', 's-kind'); k.setAttribute('data-k', s.k);
+    k.appendChild(el('i')); k.appendChild(document.createTextNode(KIND[s.k]));
+    if (s.tool && technical) k.appendChild(el('code', 'tool', s.tool));
+    b.appendChild(k);
+    var tx = el('div', 's-text'); rich(tx, s.x); b.appendChild(tx);
+    if (j){ var w = el('div', 's-where'); w.appendChild(woLink(j.id)); w.appendChild(document.createTextNode(' · ' + j.title)); b.appendChild(w); }
+    li.appendChild(b);
+    return li;
+  }
+
+  /* ---------- tonight ---------- */
+  function renderNeeds(){
+    var body = $('needs-body'), list = asks(); body.textContent = '';
+    $('needs').classList.toggle('needs', list.length > 0);
+    $('needs-n').textContent = list.length ? list.length + ' waiting · Rig also texted you' : '';
+    if (!list.length){ body.appendChild(el('p', 'empty', 'Nothing needs you. Rig texts you before any part over $' + PARTS_LIMIT + ', or if a payment fails twice.')); return; }
+    list.forEach(function(j){
+      var a = el('div', 'ask'), q = el('div', 'ask-q');
+      q.appendChild(el('p', null, j.ask.q));
+      var sm = el('small'); sm.appendChild(woLink(j.id)); sm.appendChild(document.createTextNode(' · ' + j.ask.sub)); q.appendChild(sm);
+      a.appendChild(q);
+      var b = el('div', 'ask-btns');
+      b.appendChild(btn('Approve', true, function(){ ownerDecides(j, true); }));
+      b.appendChild(btn('Hold until morning', false, function(){ ownerDecides(j, false); }));
+      a.appendChild(b); body.appendChild(a);
+    });
+  }
+  function renderMoney(){
+    var inv = 0, paid = 0, waiting = 0, today = 0;
+    jobs.forEach(function(j){
+      if (!j.ms.sent) return;
+      inv += j.inv.total;
+      if (j.stage === 'paid'){ paid += j.inv.total; if (/^Today/.test(j.ms.deposit)) today += j.inv.total; }
+      else waiting += j.inv.total;
+    });
+    var box = $('money'); box.textContent = '';
+    [['Invoiced tonight', inv, ''], ['Collected through RoadSync', paid, 'ok'], ['Waiting for payment', waiting, waiting ? 'warn' : ''],
+     ['In today’s 6:00 AM deposit, before RoadSync fees', today, '']].forEach(function(t){
+      var d = el('div', 'tile ' + t[2]); d.appendChild(el('div', 'tile-n', money(t[1]))); d.appendChild(el('div', 'tile-l', t[0])); box.appendChild(d);
+    });
+  }
+  function renderBoard(){
+    var box = $('board'); box.textContent = '';
+    STAGES.forEach(function(sg){
+      var col = el('div'), list = jobs.filter(function(j){ return j.stage === sg[0]; });
+      var h = el('div', 'col-h'); h.appendChild(el('span', null, sg[1])); h.appendChild(el('span', null, String(list.length)));
+      col.appendChild(h);
+      var body = el('div', 'colbody');
+      list.forEach(function(j){
+        var st = status(j), c = el('button', 'card' + (st.flag ? ' flag' : '') + (j.bornSeq > seen ? ' new' : '')); c.type = 'button';
+        c.onclick = function(){ location.hash = 'job/' + j.id; };
+        c.appendChild(el('span', 'wo', j.id));
+        c.appendChild(el('b', null, j.title));
+        c.appendChild(el('div', 'c-m', (j.know.Payer || 'Payer not known yet') + (j.know.Driver ? ' · ' + j.know.Driver : '')));
+        c.appendChild(el('div', 'c-s' + (st.tone === 'ok' ? ' ok' : st.tone === 'no' ? ' no' : ''), st.t));
+        body.appendChild(c);
+      });
+      col.appendChild(body); box.appendChild(col);
+    });
+  }
+  function renderFeed(){
+    var all = [];
+    jobs.forEach(function(j){ j.steps.forEach(function(s){ if (/^(act|ask|event|fail|person)$/.test(s.k)) all.push({ s: s, j: j }); }); });
+    all.sort(function(a, b){ return (toMin(b.s.t) - toMin(a.s.t)) || (b.s.seq - a.s.seq); });
+    var ol = $('feed'); ol.textContent = '';
+    all.slice(0, 12).forEach(function(x){ ol.appendChild(stepLi(x.s, x.j)); });
+  }
+
+  /* ---------- jobs ---------- */
+  function renderThreads(){
+    var q = $('search').value.trim().toLowerCase(), box = $('thread-list'); box.textContent = '';
+    var order = { intake: 0, sign: 1, work: 2, invoice: 3, paid: 4 };
+    jobs.slice().sort(function(a, b){ return ((status(b).flag ? 1 : 0) - (status(a).flag ? 1 : 0)) || (order[a.stage] - order[b.stage]); }).forEach(function(j){
+      if (q && (j.id + ' ' + j.title + ' ' + (j.know.Driver || '') + ' ' + (j.know.Payer || '')).toLowerCase().indexOf(q) < 0) return;
+      var b = el('button', 'th'); b.type = 'button';
+      if (j.id === openId) b.setAttribute('aria-current', 'true');
+      var top = el('div', 'th-top'), last = j.msgs[j.msgs.length - 1];
+      top.appendChild(el('b', null, j.id + ' · ' + j.title));
+      top.appendChild(el('span', null, last ? last.t : ''));
+      b.appendChild(top);
+      b.appendChild(el('div', 'th-last', last ? (last.from === 'payroad' ? 'RoadSync: ' : last.from === 'rig' ? 'Rig: ' : '') + (last.photo ? 'Photo' : last.x) : '…'));
+      var st = status(j); b.appendChild(pill(st.t, st.tone));
+      b.onclick = function(){ userPicked = true; openId = j.id; $('inbox').classList.add('reading'); renderJobs(); scrollJob(true); };
+      box.appendChild(b);
+    });
+  }
+  $('search').oninput = renderThreads;
+  function bubble(x, j){
+    if (x.from === 'payroad'){
+      var s = el('div', 'sys' + (x.fail ? ' fail' : '') + (x.seq > seen ? ' new' : ''));
+      s.appendChild(el('b', null, x.fail ? 'RoadSync · failed' : 'RoadSync'));
+      s.appendChild(document.createTextNode(x.x));
+      s.appendChild(el('span', 'meta', x.t));
+      return s;
+    }
+    if (x.from === 'note') return el('div', 'note', x.x);
+    var out = x.from === 'rig' || x.from === 'staff';
+    var cls = 'msg ' + (out ? 'out' : 'in');
+    if (x.from === 'rig' && x.to !== 'driver') cls += ' tostaff';
+    if (x.from === 'staff') cls += ' human';
+    if (x.from === 'tech' || x.from === 'owner') cls += ' staffin';
+    if (x.seq > seen) cls += ' new';
+    var w = el('div', cls);
+    w.appendChild(x.photo ? el('div', 'photo', 'Photo') : el('div', 'b', x.x));
+    var drv = j.know.Driver || 'Driver';
+    var who = x.from === 'driver' ? drv
+      : x.from === 'rig' ? 'Rig → ' + (x.to === 'driver' ? drv : x.to === 'tech' ? 'Marco (tech)' : 'Dana (owner)')
+      : x.from === 'tech' ? 'Marco (tech)' : x.from === 'owner' ? 'Dana (owner)' : 'Dana, by hand';
+    w.appendChild(el('div', 'meta', who + ' · ' + x.t));
+    return w;
+  }
+  function renderConv(){
+    var j = job(openId), c = $('conv'); c.textContent = '';
+    var h = el('div', 'conv-head');
+    var back = el('button', 'iconbtn back'); back.type = 'button'; back.setAttribute('aria-label', 'Back to jobs');
+    back.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+    back.onclick = function(){ $('inbox').classList.remove('reading'); };
+    h.appendChild(back);
+    var tt = el('div', 't'); tt.appendChild(el('b', null, j.id + ' · ' + j.title));
+    tt.appendChild(el('small', null, (j.know.Driver || 'New driver') + ' · ' + j.phone + ' · texts in ' + j.lang + (j.know.Payer ? ' · ' + j.know.Payer + ' pays' : '')));
+    h.appendChild(tt);
+    var st = status(j); h.appendChild(pill(st.t, st.tone));
+    c.appendChild(h);
+
+    var m = el('div', 'msgs'); m.id = 'msgs';
+    var lg = el('div', 'legend');
+    [['var(--bubble-in)', 'Driver'], ['var(--amber)', 'Rig → driver'], ['var(--surface-2)', 'Rig ↔ Marco / Dana'], ['var(--ok)', 'RoadSync']].forEach(function(x){
+      var s = el('span'), i = el('i'); i.style.background = x[0]; s.appendChild(i); s.appendChild(document.createTextNode(x[1])); lg.appendChild(s);
+    });
+    m.appendChild(lg);
+    j.msgs.forEach(function(x){ m.appendChild(bubble(x, j)); });
+    c.appendChild(m);
+
+    var comp = el('div', 'composer');
+    if (j.takeover){
+      var ta = el('textarea'); ta.placeholder = 'Text ' + (j.know.Driver || 'the driver') + ' as Dana…'; ta.setAttribute('aria-label', 'Message to the driver');
+      comp.appendChild(ta);
+      comp.appendChild(btn('Send', true, function(){
+        var v = ta.value.trim(); if (!v) return;
+        j.msgs.push(M('staff', now(), v));
+        j.steps.push(S('person', now(), 'Dana texted the driver directly.'));
+        renderAll(); scrollJob(false);
+      }));
+      comp.appendChild(btn('Hand back to Rig', false, function(){
+        j.takeover = false;
+        j.msgs.push(M('note', now(), 'Dana handed the thread back to Rig'));
+        j.steps.push(S('person', now(), 'Dana handed the thread back. Rig reads what she wrote and picks up from there.'));
+        renderAll(); scrollJob(false); toast('Rig is handling it again.');
+      }));
+    } else if (j.stage === 'paid'){
+      comp.appendChild(el('p', null, 'Paid and closed. If the driver texts again, Rig picks it back up.'));
+    } else {
+      var p = el('p'); p.appendChild(el('b', null, 'Rig is handling this job. ')); p.appendChild(document.createTextNode('Take over any time; Rig stops texting until you hand it back.'));
+      comp.appendChild(p);
+      comp.appendChild(btn('Take over', false, function(){
+        j.takeover = true;
+        j.msgs.push(M('note', now(), 'Dana took over. Rig stopped texting.'));
+        j.steps.push(S('person', now(), 'Dana took over the thread.'));
+        renderAll(); scrollJob(false);
+      }));
+    }
+    c.appendChild(comp);
+  }
+  function renderSide(){
+    var j = job(openId), a = $('jobside'), keep = a.scrollTop; a.textContent = '';
+    var tr = el('div'); tr.appendChild(el('h3', null, 'Where this job is'));
+    var ol = el('ol', 'track'), open = true;
+    TRACK.forEach(function(t){
+      var at = j.ms[t[0]], failed = t[0] === 'paid' && !at && j.pay && j.pay.status === 'failed';
+      var cls = '';
+      if (t[0] === 'deposit' && at) cls = 'now';
+      else if (at) cls = 'done';
+      else if (open){ cls = failed ? 'fail now' : 'now'; open = false; }
+      var li = el('li', cls); li.appendChild(el('span', 'dot'));
+      var l = el('div', 'lbl', t[1]); l.appendChild(el('small', null, failed ? 'Last try failed: ' + j.pay.reason : t[2])); li.appendChild(l);
+      li.appendChild(el('span', 'when', at || ''));
+      ol.appendChild(li);
+    });
+    tr.appendChild(ol); a.appendChild(tr);
+
+    var r = rec(j), rs = el('div'), rh = el('h3'); rh.appendChild(el('span', null, 'In RoadSync'));
+    rh.appendChild(btn('Open in RoadSync', false, function(){ toast('In the real app this opens ' + j.id + ' in RoadSync.'); }));
+    rh.lastChild.className = 'btn sm';
+    rs.appendChild(rh);
+    var box = el('div', 'rsbox'), kv = el('dl', 'kv');
+    [['Work order', WOL[r.wo][0], r.wo === 'none' ? '' : 'status: ' + r.wo],
+     ['Invoice', r.invNo ? '#' + r.invNo + ' · ' + INVL[r.inv][0] : INVL[r.inv][0], r.invNo ? 'status: ' + r.inv : ''],
+     ['Deposit', r.deposit, '']].forEach(function(x){
+      kv.appendChild(el('dt', null, x[0]));
+      var dd = el('dd', null, x[1]); if (x[2]) dd.appendChild(el('span', 'api', x[2])); kv.appendChild(dd);
+    });
+    box.appendChild(kv); rs.appendChild(box); a.appendChild(rs);
+
+    var kn = el('div'); kn.appendChild(el('h3', null, 'What Rig collected'));
+    var dl = el('dl', 'kv');
+    COLLECT.forEach(function(c){
+      dl.appendChild(el('dt', null, c[1]));
+      var v = j.know[c[0]]; dl.appendChild(el('dd', v ? '' : 'miss', v || (c[2] ? 'Rig is asking' : 'Optional')));
+    });
+    kn.appendChild(dl); a.appendChild(kn);
+
+    if (j.inv){
+      var iv = el('div'), ih = el('h3'); ih.appendChild(el('span', null, 'Invoice'));
+      ih.appendChild(pill(j.stage === 'paid' ? 'Paid' : j.ms.sent ? 'Sent' : 'Draft · Marco confirms', j.stage === 'paid' ? 'ok' : 'wait'));
+      iv.appendChild(ih);
+      var tb = el('table', 'inv');
+      j.inv.lines.forEach(function(l){ var r = el('tr'); r.appendChild(el('td', null, l[0])); r.appendChild(el('td', null, money(l[1]))); tb.appendChild(r); });
+      [['sub', 'Subtotal', j.inv.sub], ['sub', 'Code / check fee (3%)', j.inv.fee], ['tot', 'Total with a code', j.inv.total]].forEach(function(x){
+        var r = el('tr', x[0]); r.appendChild(el('td', null, x[1])); r.appendChild(el('td', null, money(x[2]))); tb.appendChild(r);
+      });
+      iv.appendChild(tb);
+      iv.appendChild(el('p', 'small', 'Prices from the shop rate card and Marco’s text. ' + (j.pay && j.pay.status === 'paid' ? 'Paid with code ••••' + j.pay.last4 + ', auth ' + j.pay.auth + '.' : 'Rig never sees the code: the driver pays on RoadSync’s page.')));
+      a.appendChild(iv);
+    }
+
+    var sp = el('div'), sh = el('h3'); sh.appendChild(el('span', null, 'Rig’s steps'));
+    var lab = el('label', 'techtoggle'), cb = el('input'); cb.type = 'checkbox'; cb.checked = technical;
+    cb.onchange = function(){ technical = cb.checked; renderSide(); renderFeed(); };
+    lab.appendChild(cb); lab.appendChild(document.createTextNode('Show reasoning and tools'));
+    sh.appendChild(lab); sp.appendChild(sh);
+    var so = el('ol', 'steps');
+    j.steps.forEach(function(s){ if (s.k === 'think' && !technical) return; so.appendChild(stepLi(s)); });
+    sp.appendChild(so); a.appendChild(sp);
+    a.scrollTop = keep;
+  }
+  function renderJobs(){ renderThreads(); renderConv(); renderSide(); }
+  function scrollJob(top){ var m = $('msgs'); if (m) m.scrollTop = m.scrollHeight; if (top) $('jobside').scrollTop = 0; }
+
+  /* ---------- RoadSync statuses ----------
+     Work order status (WorkOrders API): new · sent · completed (signed).
+     Invoice status (Invoice API): new · sent · processing · failed · completed (paid) · markedaspaid …, plus depositStatus.
+     "draft" is Rig's own: the invoice waits for the tech's YES before Rig creates it in RoadSync. */
+  var WOL = { none: ['Not created yet', 'idle'], 'new': ['Created', 'idle'], sent: ['Sent · waiting for signature', 'wait'], completed: ['Signed', 'ok'] };
+  var INVL = { none: ['No invoice yet', 'idle'], draft: ['Draft in Rig · tech confirms', 'wait'], 'new': ['Created', 'idle'], sent: ['Sent · waiting for payment', 'wait'],
+    processing: ['Processing payment', 'wait'], failed: ['Payment failed', 'no'], completed: ['Paid', 'ok'], markedaspaid: ['Marked as paid', 'ok'] };
+  /* work orders the crew made by hand: Rig shows their status but doesn't touch them */
+  var others = [
+    { id: 'WO-1040', title: 'Volvo VNL 670 · unit 330', payer: 'Lone Star Freight', driver: 'Pete Hall', by: 'Luis (day lead)', wo: 'completed', inv: 'sent', invNo: 322949, total: 902.75, method: '—', deposit: '—', updated: 'Yesterday 9:20 PM' },
+    { id: 'WO-1039', title: 'Freightliner M2 · unit 77', payer: 'Valley Produce', driver: 'Not signed yet', by: 'Luis (day lead)', wo: 'sent', inv: 'none', updated: 'Yesterday 6:40 PM', note: 'Sent 9 hours ago, still not signed' },
+    { id: 'WO-1038', title: 'Mack Anthem · unit 9', payer: 'Gulf Coast Carriers', driver: 'Ray Lopez', by: 'Front desk', wo: 'completed', inv: 'markedaspaid', invNo: 322940, total: 415, method: 'Paper check, marked by hand', deposit: 'Outside RoadSync', updated: 'Yesterday 5:30 PM' },
+    { id: 'WO-1036', title: 'Peterbilt 579 · unit 14', payer: 'Rio Freight', driver: 'Ana Cruz', by: 'Front desk', wo: 'completed', inv: 'completed', invNo: 322931, total: 1184.2, method: 'EFS ••••0912', deposit: 'Deposited · yesterday 6:00 AM', updated: 'Yesterday 2:10 PM' }
+  ];
+  var INVNO = { 'WO-1041': 322951, 'WO-1042': 322958, 'WO-1044': 322963 };
+  function rec(j){
+    var inv = !j.inv ? 'none' : !j.ms.sent ? 'draft' : j.stage === 'paid' ? 'completed' : (j.pay && j.pay.status === 'failed') ? 'failed' : 'sent';
+    var last = j.msgs[j.msgs.length - 1];
+    return { id: j.id, title: j.title, payer: j.know.Payer || 'Not known yet', driver: j.know.Driver || 'Rig is asking',
+      by: 'Rig', job: true, wo: j.stage === 'intake' ? 'none' : j.stage === 'sign' ? 'sent' : 'completed', inv: inv,
+      invNo: j.ms.sent ? INVNO[j.id] : null, total: j.inv ? j.inv.total : null,
+      method: j.pay && j.pay.last4 ? 'Comchek ••••' + j.pay.last4 + (j.pay.status === 'failed' ? ' · declined' : '') : '—',
+      deposit: j.stage === 'paid' ? 'Pending · ' + j.ms.deposit.replace(/^T/, 't') : '—',
+      updated: last ? 'Tonight ' + last.t : '', flag: status(j).flag };
+  }
+  function records(){ return jobs.map(rec).concat(others); }
+  function labelCell(map, code){
+    var td = el('td'), l = map[code] || [code, 'idle'];
+    td.appendChild(pill(l[0], l[1]));
+    td.appendChild(el('span', 'api', code === 'none' ? '—' : code === 'draft' ? 'not in RoadSync yet' : 'status: ' + code));
+    return td;
+  }
+  function openRec(r){
+    if (r.job) location.hash = 'job/' + r.id;
+    else toast(r.id + ' was made by ' + r.by + '. Rig shows its status from RoadSync; open it in RoadSync to change it.');
+  }
+  function byCell(r){
+    var td = el('td');
+    if (r.by === 'Rig'){ var s = el('span', 'by-rig'); s.innerHTML = '<svg aria-hidden="true"><use href="#bot"/></svg>'; s.appendChild(document.createTextNode('Rig')); td.appendChild(s); }
+    else td.textContent = r.by;
+    return td;
+  }
+  function chips(boxId, defs, cur, set){
+    var f = $(boxId); f.textContent = '';
+    defs.forEach(function(d){
+      var b = el('button', 'chip', d[1]); b.type = 'button';
+      b.appendChild(el('b', null, String(d[2])));
+      b.setAttribute('aria-pressed', String(cur === d[0]));
+      b.onclick = function(){ set(d[0]); };
+      f.appendChild(b);
+    });
+  }
+  var woFilter = 'all', payFilter = 'all';
+  var WOF = {
+    all: function(){ return true; },
+    sign: function(r){ return r.wo === 'sent'; },
+    work: function(r){ return r.wo === 'completed' && (r.inv === 'none' || r.inv === 'draft'); },
+    out: function(r){ return r.inv === 'sent' || r.inv === 'failed' || r.inv === 'processing'; },
+    paid: function(r){ return r.inv === 'completed' || r.inv === 'markedaspaid'; }
+  };
+  function renderOrders(){
+    var all = records();
+    chips('wo-filters', [['all', 'All'], ['sign', 'Waiting for signature'], ['work', 'Signed · no invoice yet'], ['out', 'Invoice out'], ['paid', 'Paid']].map(function(d){ return d.concat(all.filter(WOF[d[0]]).length); }),
+      woFilter, function(v){ woFilter = v; renderOrders(); });
+    var tb = $('wo-body'); tb.textContent = '';
+    all.filter(WOF[woFilter]).forEach(function(r){
+      var tr = el('tr', 'click' + (r.flag ? ' flag' : '')); tr.onclick = function(e){ if (e.target.tagName !== 'A') openRec(r); };
+      var td0 = el('td'); td0.appendChild(r.job ? woLink(r.id) : el('span', 'wo', r.id)); tr.appendChild(td0);
+      var td1 = el('td', null, r.title); if (r.note) td1.appendChild(el('small', null, r.note)); tr.appendChild(td1);
+      var td2 = el('td', null, r.payer); td2.appendChild(el('small', null, r.driver)); tr.appendChild(td2);
+      tr.appendChild(labelCell(WOL, r.wo));
+      var td4 = labelCell(INVL, r.inv); if (r.total) td4.insertBefore(el('div', 'num', money(r.total)), td4.firstChild); tr.appendChild(td4);
+      tr.appendChild(byCell(r));
+      tr.appendChild(el('td', null, r.updated));
+      tb.appendChild(tr);
+    });
+    if (!tb.childNodes.length){ var tr = el('tr'), td = el('td', null, 'No work orders here.'); td.colSpan = 7; td.style.color = 'var(--muted)'; tr.appendChild(td); tb.appendChild(tr); }
+    $('sync-wo').textContent = 'From RoadSync · updated ' + now();
+  }
+  var PAYF = {
+    all: function(){ return true; },
+    waiting: function(r){ return r.inv === 'sent' || r.inv === 'processing'; },
+    failed: function(r){ return r.inv === 'failed'; },
+    paid: function(r){ return r.inv === 'completed' || r.inv === 'markedaspaid'; },
+    deposited: function(r){ return /^Deposited/.test(r.deposit); }
+  };
+  function renderPayments(){
+    var all = records().filter(function(r){ return r.invNo; });
+    chips('pay-filters', [['all', 'All'], ['waiting', 'Waiting for payment'], ['failed', 'Failed'], ['paid', 'Paid'], ['deposited', 'Deposited']].map(function(d){ return d.concat(all.filter(PAYF[d[0]]).length); }),
+      payFilter, function(v){ payFilter = v; renderPayments(); });
+    var tb = $('pay-body'); tb.textContent = '';
+    all.filter(PAYF[payFilter]).forEach(function(r){
+      var tr = el('tr', 'click' + (r.inv === 'failed' ? ' flag' : '')); tr.onclick = function(e){ if (e.target.tagName !== 'A') openRec(r); };
+      tr.appendChild(el('td', 'num', '#' + r.invNo));
+      var td1 = el('td'); td1.appendChild(r.job ? woLink(r.id) : el('span', 'wo', r.id)); td1.appendChild(el('small', null, r.payer)); tr.appendChild(td1);
+      var td2 = el('td', 'num', money(r.total)); td2.appendChild(el('small', null, r.by === 'Rig' ? 'with 3% code fee' : '')); tr.appendChild(td2);
+      tr.appendChild(labelCell(INVL, r.inv));
+      tr.appendChild(el('td', null, r.method));
+      tr.appendChild(el('td', null, r.deposit));
+      tr.appendChild(el('td', null, r.updated));
+      tb.appendChild(tr);
+    });
+    if (!tb.childNodes.length){ var tr = el('tr'), td = el('td', null, 'No payments here.'); td.colSpan = 7; td.style.color = 'var(--muted)'; tr.appendChild(td); tb.appendChild(tr); }
+    $('sync-pay').textContent = 'From RoadSync · updated ' + now();
+  }
+
+  /* ---------- settings ---------- */
+  function row(title, desc, always, on){
+    var r = el('div', 'set-row'), l = el('div', 'l'); l.appendChild(el('b', null, title)); l.appendChild(el('span', null, desc)); r.appendChild(l);
+    if (always) r.appendChild(el('span', 'always', 'Always'));
+    else { var sw = el('label', 'switch'), i = el('input'); i.type = 'checkbox'; i.checked = on; i.setAttribute('aria-label', title); sw.appendChild(i); sw.appendChild(el('span')); r.appendChild(sw); }
+    return r;
+  }
+  function renderSettings(){
+    var r = $('rates'); r.textContent = '';
+    RATES.forEach(function(x){ var tr = el('tr'); tr.appendChild(el('td', null, x[0])); tr.appendChild(el('td', null, (typeof x[1] === 'number' ? money(x[1]) : x[1]) + x[2])); r.appendChild(tr); });
+    var c = $('set-collect'); c.textContent = '';
+    COLLECT.forEach(function(x){
+      var always = x[0] === 'Safe' || x[0] === 'Payer' || x[0] === 'Contact';
+      c.appendChild(row(x[1], always ? 'Always asked. RoadSync needs it for the work order.' : x[2] ? 'Required. Rig keeps asking until it has it.' : 'Optional. Rig asks once and moves on.', always, x[2]));
+    });
+    c.firstChild.querySelector('span').textContent = 'Always asked first. If not, Rig tells the driver to get safe and call 911 if needed.';
+    var s = $('set-stops'); s.textContent = '';
+    STOPS.forEach(function(x){ s.appendChild(row(x[0], x[1], x[2], true)); });
+  }
+  $('save').onclick = function(){ toast('Saved. Rig uses the new settings from the next text.'); };
+
+  /* ---------- the owner's OK ---------- */
+  function ownerDecides(j, ok){
+    j.ask = null;
+    j.msgs.push(M('owner', now(), ok ? 'YES (from the dashboard)' : 'NO, hold it (from the dashboard)'));
+    j.steps.push(S('person', now(), ok ? 'Dana approved the $412 part.' : 'Dana held the part until morning.'));
+    if (ok){
+      j.msgs.push(M('rig', now(), 'Dana approved the fan motor. Go ahead and order it.', { to: 'tech' }));
+      j.msgs.push(M('rig', now(), 'Good news: the part is approved and arriving around 6:45 AM. Plan on about 8:00 AM. I’ll text you if that changes.', { to: 'driver' }));
+      j.steps.push(S('act', now(), 'Told Marco to order it and the driver to plan on 8:00 AM.', 'send_sms'));
+    } else {
+      j.msgs.push(M('rig', now(), 'Dana is holding the fan motor until morning. Leave notes for the day crew.', { to: 'tech' }));
+      j.msgs.push(M('rig', now(), 'The part will be confirmed in the morning. The day crew will finish your truck; I’ll text you a time as soon as I have it.', { to: 'driver' }));
+      j.steps.push(S('act', now(), 'Told Marco and the driver; the job moves to the day shift.', 'send_sms'));
+    }
+    renderAll();
+    toast(ok ? 'Approved. Rig told Marco and the driver.' : 'Held. Rig told Marco and the driver.');
+  }
+
+  function renderAll(){
+    renderNav(); renderNeeds(); renderMoney(); renderBoard(); renderFeed(); renderJobs(); renderOrders(); renderPayments();
+    seen = SEQ - 1;
+  }
+  var tt;
+  function toast(msg){ var t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(function(){ t.hidden = true; }, 2800); }
+
+  /* ---------- scripted demo: one new driver, from the first text to paid ---------- */
+  var LIVE = 'WO-1044';
+  function L(){ return job(LIVE); }
+  function say(from, x, extra){ L().msgs.push(M(from, now(), x, extra)); }
+  function step(k, x, tool){ L().steps.push(S(k, now(), x, tool)); }
+  function doing(t){ $('doing').classList.toggle('idle', !t); $('doing-t').textContent = ''; $('doing-t').appendChild(el('b', null, t || 'Waiting for a text.')); }
+  var SCRIPT = [
+    [3*60+52, 'New text on the night line…', function(){
+      jobs.unshift({ id: LIVE, title: 'New driver', stage: 'intake', lang: 'English', phone: '(830) 555-0119', know: { Problem: 'Blown steer tire', Location: 'Truckmasters lot' }, ms: {}, msgs: [], steps: [], bornSeq: SEQ });
+      if (!userPicked) openId = LIVE;
+      say('driver', 'DOWN. blew a steer tire on 83, limped into your lot');
+      step('in', 'New number: blew a steer tire, made it to the lot.');
+    }],
+    [3*60+52, 'Deciding what to ask first…', function(){
+      step('think', 'Problem and location are in. First make sure he is safe, then truck, unit, name and who pays.');
+      say('rig', 'Truckmasters night desk, this is Rig. Are you parked somewhere safe? What truck is it, and the unit number?', { to: 'driver' });
+      step('act', 'Asked if he is safe, the truck and the unit number.', 'send_sms');
+    }],
+    [3*60+54, 'Reading the driver’s answer…', function(){
+      var j = L();
+      say('driver', 'yeah im safe in your lot. volvo vnl 860 unit 212');
+      step('in', 'Driver: safe, Volvo VNL 860 unit 212.');
+      j.know.Safe = 'Yes, in the lot'; j.know.Truck = 'Volvo VNL 860'; j.know.Unit = '212'; j.title = 'Volvo VNL 860 · unit 212';
+      say('rig', 'Thanks. What’s your name, and which company is paying for the repair?', { to: 'driver' });
+      step('act', 'Asked his name and who pays.', 'send_sms');
+    }],
+    [3*60+55, 'Reading the driver’s answer…', function(){
+      var j = L();
+      say('driver', 'Mike Reyes. Lone Star Freight');
+      step('in', 'Driver: Mike Reyes, Lone Star Freight pays.');
+      j.know.Driver = 'Mike Reyes'; j.know.Payer = 'Lone Star Freight';
+      say('rig', 'Got it, Mike. Who at Lone Star Freight should get the work order? A dispatch email or phone works.', { to: 'driver' });
+      step('act', 'Asked who at Lone Star gets the work order.', 'send_sms');
+    }],
+    [3*60+57, 'Checking what is still missing…', function(){
+      say('driver', 'dispatch@lonestarfreight.example');
+      step('in', 'Driver: dispatch@lonestarfreight.example.');
+      L().know.Contact = 'dispatch@lonestarfreight.example'; L().know.Photo = 'Skipped';
+      step('think', 'Everything required is in. Create the work order in RoadSync and send it for signature. Do not text Marco until it is signed.');
+    }],
+    [3*60+57, 'Creating the work order in RoadSync…', function(){
+      var j = L(); j.ms.intake = now(); j.ms.wo = now(); j.stage = 'sign';
+      step('act', 'Created {WO-1044} in RoadSync: Volvo VNL 860 unit 212, blown steer tire, Lone Star Freight pays.', 'create_work_order');
+      say('rig', 'Here is your work order, Mike. Review it and sign before we start: roadsync.example/wo/1044', { to: 'driver' });
+      step('act', 'Sent the work order to Mike for signature, copy to Lone Star dispatch.', 'send_for_signature');
+      step('wait', 'Waiting for the signature.');
+    }],
+    [4*60+1, 'RoadSync: the driver signed…', function(){
+      var j = L(); j.ms.signed = now(); j.stage = 'work';
+      say('payroad', 'Work order WO-1044 signed by Mike Reyes.');
+      step('event', 'RoadSync: {WO-1044} signed by Mike Reyes.');
+      say('rig', 'WO-1044 signed. Volvo VNL 860 unit 212, blown steer tire, in the lot. Bay 3 is free.', { to: 'tech' });
+      step('act', 'Texted Marco: signed job, bay 3 is free.', 'notify_tech');
+    }],
+    [4*60+3, 'Reading Marco’s reply…', function(){
+      say('tech', 'on it, bring it to bay 3');
+      step('in', 'Marco: bay 3.');
+      say('rig', 'Pull into bay 3, Mike. Marco is on it. I’ll text you when it’s done.', { to: 'driver' });
+      step('act', 'Told Mike: bay 3.', 'send_sms');
+    }],
+    [5*60+5, 'Marco says the job is done…', function(){
+      say('tech', 'done. 1.5 hrs, new steer tire 295/75R22.5 $389');
+      step('in', 'Marco: done, 1.5 hrs, new steer tire $389.');
+      L().ms.done = now();
+      step('think', 'Build the invoice from the rate card: shop labor $189/hr × 1.5, and the tire at $389 as Marco said. Marco confirms before it goes out.');
+    }],
+    [5*60+5, 'Drafting the invoice…', function(){
+      var j = L(); j.stage = 'invoice';
+      j.inv = invoice([['Shop labor · 1.5 h', 283.5], ['Steer tire 295/75R22.5', 389]]);
+      step('act', 'Drafted the invoice for {WO-1044}: $672.50. Asked Marco to confirm.', 'create_invoice');
+      say('rig', 'Invoice WO-1044: shop labor 1.5 h $283.50, steer tire $389.00. Subtotal $672.50. Send it? Reply YES or tell me what to change.', { to: 'tech' });
+    }],
+    [5*60+7, 'Marco confirmed. Sending the invoice…', function(){
+      var j = L();
+      say('tech', 'yes');
+      step('in', 'Marco: yes.');
+      j.ms.approved = now(); j.ms.sent = now(); j.pay = { status: 'waiting' };
+      say('rig', 'Your truck is ready in bay 3, Mike. Invoice: $672.50, or $692.68 with a Comchek or EFS code (3% fee). Pay here: roadsync.example/i/1044\nAsk Lone Star dispatch for a code for the exact total.', { to: 'driver' });
+      step('act', 'Sent the invoice: $692.68 with a code. Told him to ask for the exact total.', 'send_invoice');
+      step('wait', 'Waiting for the payment.');
+    }],
+    [5*60+14, 'RoadSync: payment attempt…', function(){
+      L().pay = { status: 'failed', reason: 'the code covers less than the total', last4: '3310' };
+      say('payroad', 'Payment failed: Comchek code ••••3310 covers $672.50, the total is $692.68. Nothing was charged.', { fail: true });
+      step('fail', 'Payment failed on {WO-1044}: the code covers $672.50, the total is $692.68.');
+      step('think', 'The code covers the subtotal but not the 3% fee. Nothing was charged, so a retry is safe. Tell Mike the exact amount.');
+    }],
+    [5*60+15, 'Explaining the failed payment to the driver…', function(){
+      say('rig', 'Nothing was charged, Mike. The code from Lone Star covers $672.50, but the total with the code fee is $692.68. Ask dispatch for a code for exactly $692.68 and enter it on the same link.', { to: 'driver' });
+      step('act', 'Told Mike why it failed and the exact amount to ask for.', 'send_sms');
+      say('driver', 'ok calling them now');
+      step('in', 'Mike: calling dispatch.');
+    }],
+    [5*60+22, 'RoadSync: payment attempt…', function(){
+      var j = L(); j.pay = { status: 'paid', last4: '8817', auth: 'A40215' }; j.ms.paid = now(); j.ms.deposit = 'Tomorrow 6:00 AM'; j.stage = 'paid';
+      say('payroad', 'Paid $692.68 · Comchek code ••••8817 · auth A40215. Receipt sent to the driver.');
+      step('event', 'RoadSync: {WO-1044} paid $692.68 · Comchek ••••8817.');
+    }],
+    [5*60+22, 'Closing the job…', function(){
+      say('rig', 'Payment received, thanks Mike. Your receipt is on its way. You’re good to go. Safe trip.', { to: 'driver' });
+      step('act', 'Thanked Mike and closed the job. Paid after midnight, so it goes in tomorrow’s 6:00 AM deposit.', 'send_sms');
+    }]
+  ];
+  var idx = 0, timer = null;
+  function runOne(){
+    var s = SCRIPT[idx++];
+    mins = s[0]; $('clock').textContent = now(); doing(s[1]);
+    s[2]();
+    renderAll();
+    if (current === 'jobs' && openId === LIVE) scrollJob(false);
+    if (idx >= SCRIPT.length){ doing(null); return false; }
+    return true;
+  }
+  function play(){ timer = setTimeout(function tick(){ if (runOne()) timer = setTimeout(tick, 3200); }, 2500); }
+  $('skip').onclick = function(){ clearTimeout(timer); if (idx >= SCRIPT.length) return; while (idx < SCRIPT.length) runOne(); toast('Skipped to 5:22 AM: WO-1044 is paid.'); };
+  $('replay').onclick = function(){ location.reload(); };
+
+  renderSettings();
+  renderAll();
+  go(location.hash.slice(1) || 'tonight');
+  play();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rig Night Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a sticky bar with two tabs, Driver's phone and Shop screen, plus the clock and playback buttons. The driver tab is a phone: first a text thread, then the truckdown page in a browser. The shop tab is the console that fills itself. Dark-first, amber on asphalt. */
+:root{
+  --bg:#14161A; --surface:#1E2126; --surface-2:#262A31; --line:#2E333A;
+  --text:#F2EFE6; --muted:#A7ADB5;
+  --amber:#F5B301; --on-amber:#14161A; --amber-ink:#F5B301; --mark:#F5B301;
+  --bubble-driver:#2F353E; --ok:#5CC48D; --no:#E88A7A;
+  --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F2EFE6; --surface:#FBF9F3; --surface-2:#E8E3D6; --line:#D6D0C1;
+    --text:#14161A; --muted:#565C65;
+    --amber:#F5B301; --on-amber:#14161A; --amber-ink:#8F5D00; --mark:#B87800;
+    --bubble-driver:#E1DCCD; --ok:#1E7A4C; --no:#A8402F;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F2EFE6; --surface:#FBF9F3; --surface-2:#E8E3D6; --line:#D6D0C1;
+  --text:#14161A; --muted:#565C65;
+  --amber:#F5B301; --on-amber:#14161A; --amber-ink:#8F5D00; --mark:#B87800;
+  --bubble-driver:#E1DCCD; --ok:#1E7A4C; --no:#A8402F;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:400 16px/1.5 var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.wrap{max-width:1100px;margin-inline:auto;padding-inline:16px;padding-block:16px 40px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding-block:4px 14px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-name{font:800 34px/1 var(--display);letter-spacing:.08em;text-transform:uppercase}
+.brand-name i{display:inline-block;width:8px;height:8px;background:var(--amber);margin-left:3px}
+.top-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{min-height:44px;padding-inline:14px;border:0;background:transparent;cursor:pointer;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);font-weight:600}
+.btn{min-height:44px;padding-inline:20px;border-radius:6px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:600}
+.btn:hover:not(:disabled){background:var(--surface)}
+.btn.primary{background:var(--amber);color:var(--on-amber);border-color:var(--amber)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);background:var(--amber)}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* sticky bar */
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-block:1px solid var(--line);padding-block:10px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.tabs{display:flex;gap:6px;flex:1 1 300px}
+.tab{flex:1 1 0;min-height:46px;padding-inline:14px;border:1px solid var(--line);border-radius:8px;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.tab[aria-selected="true"]{background:var(--surface-2);color:var(--text);border-color:var(--amber-ink)}
+.tab .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);animation:pulse 1.4s ease-in-out infinite}
+.clockbox{display:flex;align-items:baseline;gap:10px;min-width:0}
+.clock{font:800 34px/1 var(--display);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.now{font-size:14px;color:var(--muted)}
+.ctrl{display:flex;gap:8px;margin-left:auto}
+.upnext{margin:10px 0 0;font-size:14px;color:var(--muted)}
+
+/* panels */
+[hidden]{display:none !important}
+.panel-wrap{margin-top:18px}
+.cap{font:700 14px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+
+/* driver tab */
+.driver-wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.device{flex:0 0 auto;width:min(100%,380px);height:660px;border:10px solid var(--surface-2);border-radius:38px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;margin-inline:auto}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+.sms-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sms-name{font-weight:600;line-height:1.2}
+.sms-sub{font-size:13px;color:var(--muted)}
+.sms-body{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.sms-empty{margin:auto;text-align:center;color:var(--muted);font-size:15px;max-width:22ch}
+.msg{max-width:84%;padding:10px 14px;border-radius:16px;font-size:16px;line-height:1.4;overflow-wrap:anywhere;animation:pop .25s ease-out}
+.msg.driver{align-self:flex-end;background:var(--bubble-driver);border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--amber);color:var(--on-amber);border-bottom-left-radius:4px;font-weight:500}
+.msg.typing{display:flex;gap:5px;padding:14px 16px;background:var(--amber);align-self:flex-start}
+.msg.typing span{width:7px;height:7px;border-radius:50%;background:var(--on-amber);animation:dot 1s infinite}
+.msg.typing span:nth-child(2){animation-delay:.15s}
+.msg.typing span:nth-child(3){animation-delay:.3s}
+.link{text-decoration:underline;font-weight:600;border-radius:4px}
+.tap{outline:3px solid var(--text);outline-offset:3px;animation:flashout .9s ease-out}
+.sms-input,.fake-input{margin:12px 16px;border:1px solid var(--line);border-radius:999px;padding:10px 16px;color:var(--muted);font-size:15px;min-height:42px}
+.urlbar{display:flex;align-items:center;gap:8px;margin:12px 12px 4px;padding:10px 14px;border-radius:999px;background:var(--surface-2);font-size:15px;overflow:hidden}
+.urlbar span{min-width:0;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.page{flex:1;min-height:0;overflow-y:auto}
+.view{padding:16px;display:flex;flex-direction:column;gap:14px}
+.pbrand{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.pbrand b{color:var(--text);font-weight:600}
+.pstep{font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.ptitle{font:800 38px/1 var(--display);text-transform:uppercase;margin:0}
+.psub{margin:0;color:var(--muted);font-size:16px}
+.fake-btn{min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--amber);color:var(--on-amber);font-weight:700;font-size:17px;padding-inline:16px;text-align:center}
+.lbl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 14px;border:1px solid var(--line);border-radius:999px;font-size:15px;background:var(--surface-2)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tile{padding:14px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-weight:600;text-align:center}
+.chip.sel,.tile.sel{background:var(--amber);color:var(--on-amber);border-color:var(--amber);font-weight:600}
+.input{min-height:46px;display:flex;align-items:center;padding-inline:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:20px;font-weight:600;letter-spacing:.06em}
+.input:empty::before{content:"—";color:var(--muted);font-weight:400}
+.map{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.map svg{display:block;width:100%;height:auto}
+.okline{display:flex;align-items:center;gap:10px;font-weight:600}
+.okline i{width:12px;height:12px;border-radius:50%;background:var(--ok);flex:0 0 12px}
+.okline small{display:block;font-weight:400;color:var(--muted);font-size:14px}
+.photo{border:1px dashed var(--line);border-radius:12px;min-height:150px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--surface-2);font-size:15px}
+.photo[data-state="added"]{border-style:solid;border-color:var(--amber-ink);color:var(--text);flex-direction:column;gap:8px;padding:12px}
+.photo svg{width:100%;max-width:240px;height:auto}
+.track{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.track li{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:16px}
+.track li::before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:0 0 16px}
+.track li.done{color:var(--text)}
+.track li.done::before{background:var(--amber);border-color:var(--amber)}
+.track li.active{color:var(--text);font-weight:600}
+.track li.active::before{border-color:var(--amber);background:transparent;animation:pulse 1.4s ease-in-out infinite}
+.thread{display:flex;flex-direction:column;gap:8px}
+.thread .msg{font-size:15px;padding:8px 12px}
+.narr{flex:1 1 260px;min-width:0;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-inline:auto}
+.narr h3{margin:0 0 6px;font:800 26px/1.1 var(--display);text-transform:uppercase}
+.narr p{margin:0;color:var(--muted)}
+
+/* shop tab */
+.console{display:grid;gap:16px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel h2{font:700 15px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.stat{display:flex;align-items:baseline;gap:10px}
+.tally{font:800 52px/1 var(--display);color:var(--amber-ink);font-variant-numeric:tabular-nums}
+.stat-label{font:600 14px/1.15 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.wo-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-bottom:14px}
+.wo-head h2{margin:0}
+.wo-id{font:800 28px/1 var(--display);letter-spacing:.04em;margin-left:8px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);font-size:14px;font-weight:600}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.pill[data-tone="active"],.pill[data-tone="wait"]{border-color:var(--amber-ink);color:var(--amber-ink)}
+.pill[data-tone="active"]::before,.pill[data-tone="wait"]::before{background:var(--amber)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 16px;margin:0}
+.fields dt{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.fields dd{margin:0;font-size:17px;font-weight:500;min-height:28px;padding-inline:6px;margin-inline:-6px;border-radius:6px;overflow-wrap:anywhere}
+.fields dd.is-empty{color:var(--muted);font-weight:400}
+.fields dd.flash{animation:flash 1.5s ease-out}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.stack{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.empty{margin:0;color:var(--muted);font-size:15px}
+.alert{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2);animation:pop .3s ease-out}
+.alert-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:4px}
+.alert-to{font:700 14px/1.2 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--amber-ink)}
+.alert-time{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.alert p{margin:0;font-size:15px}
+.part{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);animation:pop .3s ease-out}
+.part-name{font-weight:600}
+.part-state{font-size:15px;color:var(--muted)}
+.part-state[data-tone="ok"]{color:var(--ok)}
+.part-state[data-tone="no"]{color:var(--no)}
+.log{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.log li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;animation:pop .3s ease-out}
+.log-time{font:700 18px/1.2 var(--display);min-width:78px;font-variant-numeric:tabular-nums}
+.log-tag{font:700 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--amber-ink);color:var(--amber-ink);border-radius:4px;padding:4px 7px}
+.log-text{flex:1 1 220px;min-width:0;font-size:15px}
+.recap dl{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 16px}
+.recap dt{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.recap dd{margin:0;font-weight:500}
+.recap .next{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);font-size:15px}
+.foot{margin:28px 0 0;font-size:14px;color:var(--muted)}
+
+.await{cursor:pointer}
+.chip.await:not(.sel),.tile.await:not(.sel){border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,179,1,.3)}
+.fake-btn.await,.photo.await{animation:pulse 1.4s ease-in-out infinite}
+.sms-input.await{color:var(--text);border-color:var(--amber);cursor:pointer;animation:pulse 1.4s ease-in-out infinite}
+.photo.await{border-color:var(--amber)}
+.link.await{outline:2px dashed var(--amber);outline-offset:3px}
+.fake-btn{cursor:default}.fake-btn.await{cursor:pointer}
+input.input{width:100%;color:var(--text);font-family:inherit}
+input.input::placeholder{color:var(--muted);font-weight:400;letter-spacing:0}
+.decision{border-color:var(--amber-ink)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.opt{min-height:56px;text-align:left;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;display:flex;flex-direction:column;gap:2px;font-weight:600}
+.opt small{font-weight:400;color:var(--muted);font-size:14px}
+.opt:hover,.opt.await{border-color:var(--amber)}
+.opt.sel{background:var(--amber);color:var(--on-amber);border-color:var(--amber)}
+.opt.sel small{color:var(--on-amber)}
+.dec-q{margin:0 0 12px;font-size:16px}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes flash{from{background:var(--amber);color:var(--on-amber)}to{background:transparent}}
+@keyframes flashout{from{outline-color:var(--amber)}to{outline-color:var(--text)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+@media (max-width:560px){.ctrl{margin-left:0;width:100%}.ctrl .btn{flex:1}.clockbox{flex:1 1 100%}.device{height:620px}}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="bot" viewBox="0 0 160 160">
+    <path d="M54 46 V20 M106 46 V20" style="stroke:var(--mark)" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <rect x="8" y="74" width="9" height="34" rx="4.5" style="fill:var(--mark)"/>
+    <rect x="143" y="74" width="9" height="34" rx="4.5" style="fill:var(--mark)"/>
+    <rect x="26" y="46" width="108" height="92" rx="22" fill="none" style="stroke:var(--mark)" stroke-width="9"/>
+    <rect x="51" y="68" width="14" height="24" rx="7" style="fill:var(--text)"/>
+    <rect x="95" y="68" width="14" height="24" rx="7" style="fill:var(--text)"/>
+    <rect x="50" y="102" width="60" height="9" rx="4.5" style="fill:var(--text)"/>
+    <rect x="50" y="116" width="60" height="9" rx="4.5" style="fill:var(--text)"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="48" height="48" aria-hidden="true"><use href="#bot"/></svg>
+      <span class="brand-name"><span class="js-brand">Rig</span><i></i></span>
+    </div>
+    <div class="top-tools">
+      <div class="seg" role="group" aria-label="Demo mode"><button type="button" id="mode-watch" aria-pressed="true">Watch</button><button type="button" id="mode-try" aria-pressed="false">Try it</button></div>
+      <a class="btn" href="index.html" style="display:inline-flex;align-items:center;text-decoration:none;color:inherit">Back to site</a>
+      <button type="button" class="btn" id="reset">Reset</button>
+    </div>
+  </header>
+
+  <div class="sticky">
+    <div class="tabs" role="tablist" aria-label="Demo screens">
+      <button type="button" class="tab" role="tab" id="tab-driver" aria-selected="true" aria-controls="panel-driver">Trucker<span class="dot" id="dot-driver" hidden></span></button>
+      <button type="button" class="tab" role="tab" id="tab-shop" aria-selected="false" aria-controls="panel-shop" tabindex="-1">Shop<span class="dot" id="dot-shop" hidden></span></button>
+    </div>
+    <div class="clockbox">
+      <div class="clock" id="clock" aria-live="polite">10:45 PM</div>
+      <div class="now" id="now">Shift starts</div>
+    </div>
+    <div class="ctrl">
+      <button type="button" class="btn" id="next">Next step</button>
+      <button type="button" class="btn primary" id="play">Play the night</button>
+    </div>
+  </div>
+  <p class="upnext" id="upnext"></p>
+
+  <!-- DRIVER TAB -->
+  <section class="panel-wrap driver-wrap" id="panel-driver" role="tabpanel" aria-labelledby="tab-driver">
+    <div class="device">
+      <div class="screen" id="scr-sms">
+        <div class="sms-head">
+          <svg width="34" height="34" aria-hidden="true"><use href="#bot"/></svg>
+          <div>
+            <div class="sms-name">Border Diesel &amp; Tire</div>
+            <div class="sms-sub">Night line · text message</div>
+          </div>
+        </div>
+        <div class="sms-body" id="sms" role="log" aria-live="polite" aria-label="Text messages"></div>
+        <div class="sms-input" id="sms-in">Text message</div>
+      </div>
+
+      <div class="screen" id="scr-web" hidden lang="en">
+        <div class="urlbar" aria-label="Browser address bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+          <span><span class="js-domain">iamrig.com</span>/truckdown</span>
+        </div>
+        <div class="page" id="page">
+
+          <div class="view" id="v-start">
+            <div class="pbrand"><svg width="30" height="30" aria-hidden="true"><use href="#bot"/></svg><span><b>Border Diesel &amp; Tire</b> · <span data-i="night">Night desk</span></span></div>
+            <h2 class="ptitle" data-i="p_title">Truck down?</h2>
+            <p class="psub" data-i="p_sub">Tell us what happened. We'll send a tech.</p>
+            <div class="fake-btn" id="btn-start" data-i="p_start">Start</div>
+          </div>
+
+          <div class="view" id="v-loc" hidden>
+            <div class="pstep" data-n="1"></div>
+            <h2 class="ptitle" data-i="loc_t">Where are you?</h2>
+            <div class="map" aria-hidden="true">
+              <svg viewBox="0 0 320 170">
+                <rect width="320" height="170" style="fill:var(--surface-2)"/>
+                <path d="M0 120 H320 M60 0 V170 M200 0 V170" style="stroke:var(--line)" stroke-width="2" fill="none"/>
+                <path d="M0 120 H320" style="stroke:var(--bg)" stroke-width="14" fill="none" opacity="0.55"/>
+                <rect x="212" y="40" width="88" height="56" rx="6" style="fill:var(--line)"/>
+                <circle cx="168" cy="118" r="20" style="fill:var(--amber)" opacity="0.28"/>
+                <circle cx="168" cy="118" r="9" style="fill:var(--amber)"/>
+                <circle cx="168" cy="118" r="3.5" style="fill:var(--on-amber)"/>
+              </svg>
+            </div>
+            <div class="okline"><i></i><span><span data-i="loc_ok">Location shared</span><small data-i="loc_sub">At the shop gate</small></span></div>
+            <div class="fake-btn" id="btn-loc" data-i="cont">Continue</div>
+          </div>
+
+          <div class="view" id="v-truck" hidden>
+            <div class="pstep" data-n="2"></div>
+            <h2 class="ptitle" data-i="truck_t">Your truck</h2>
+            <div><div class="lbl" data-i="make">Make</div>
+              <div class="chips"><span class="chip" data-v="Kenworth">Kenworth</span><span class="chip" data-v="Peterbilt">Peterbilt</span><span class="chip" data-v="Freightliner">Freightliner</span><span class="chip" data-v="Volvo">Volvo</span><span class="chip" data-v="Other" data-i="opt_other">Other</span></div></div>
+            <div><div class="lbl" id="plate-l" data-i="plate">Plate, last 4</div><input class="input" id="in-plate" inputmode="numeric" maxlength="4" placeholder="4471" autocomplete="off" aria-labelledby="plate-l"></div>
+            <div class="fake-btn" id="btn-truck" data-i="cont">Continue</div>
+          </div>
+
+          <div class="view" id="v-problem" hidden>
+            <div class="pstep" data-n="3"></div>
+            <h2 class="ptitle" data-i="prob_t">What's wrong?</h2>
+            <div class="tiles">
+              <div class="tile" data-v="engine" data-i="opt_engine">Engine</div>
+              <div class="tile" data-v="brakes" data-i="opt_brakes">Brakes</div>
+              <div class="tile" data-v="tires" data-i="opt_tires">Tires</div>
+              <div class="tile" data-v="elec" data-i="opt_elec">Electrical</div>
+              <div class="tile" data-v="reefer" data-i="opt_reefer">Reefer unit</div>
+              <div class="tile" data-v="other" data-i="opt_other">Other</div>
+            </div>
+            <div><div class="lbl" id="code-l" data-i="code_l">Fault code</div><input class="input" id="in-code" maxlength="5" placeholder="e.g. 17" autocomplete="off" aria-labelledby="code-l"></div>
+            <div><div class="lbl" data-i="when_l">How long ago?</div>
+              <div class="chips"><span class="chip" data-v="now" data-i="when_now">Just now</span><span class="chip" data-v="20" data-i="when_20">About 20 min</span><span class="chip" data-v="more" data-i="when_more">Earlier</span></div></div>
+            <div class="fake-btn" id="btn-prob" data-i="cont">Continue</div>
+          </div>
+
+          <div class="view" id="v-photo" hidden>
+            <div class="pstep" data-n="4"></div>
+            <h2 class="ptitle" data-i="photo_t">Add a photo</h2>
+            <div class="photo" id="photo" data-state="empty">
+              <span id="photo-empty" data-i="photo_tap">Tap to add a photo or video</span>
+              <svg id="photo-img" viewBox="0 0 240 130" aria-hidden="true" hidden><rect width="240" height="130" rx="8" style="fill:var(--bg)"/><rect x="28" y="30" width="150" height="62" rx="6" style="fill:var(--line)"/><rect x="178" y="48" width="38" height="44" rx="5" style="fill:var(--muted)"/><circle cx="62" cy="100" r="13" style="fill:var(--muted)"/><circle cx="150" cy="100" r="13" style="fill:var(--muted)"/><rect x="44" y="42" width="40" height="8" rx="4" style="fill:var(--amber)"/></svg>
+              <span id="photo-ok" data-i="photo_ok" hidden>1 photo added</span>
+            </div>
+            <div class="fake-btn" id="btn-send" data-i="send">Send to the shop</div>
+          </div>
+
+          <div class="view" id="v-status" hidden>
+            <div class="pbrand"><svg width="30" height="30" aria-hidden="true"><use href="#bot"/></svg><span><b>Border Diesel &amp; Tire</b></span></div>
+            <h2 class="ptitle" id="st-title" data-i="sent_t0">Sent. The shop has your details.</h2>
+            <p class="psub" id="st-sub" data-i="sent_sub0">We'll update this page as things move.</p>
+            <ul class="track" aria-label="Status">
+              <li id="trk1" data-i="trk1">Received</li>
+              <li id="trk2" data-i="trk2">In bay 2</li>
+              <li id="trk3" data-i="trk3">Waiting on a part</li>
+              <li id="trk4" data-i="trk4" hidden>Estimated done: about 8:00 AM</li>
+            </ul>
+            <div><div class="lbl" data-i="msgs_h">Messages</div>
+              <div class="thread" id="thread"></div></div>
+            <div class="chips" id="ask-opts" hidden></div>
+            <div class="fake-input" id="ask-in" style="margin:0" aria-hidden="true"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <aside class="narr" aria-live="polite">
+      <div class="cap">What's happening</div>
+      <h3 id="narr-t">A driver is on the road</h3>
+      <p id="narr-p">Nothing has happened yet. Press Play the night.</p>
+    </aside>
+  </section>
+
+  <!-- SHOP TAB -->
+  <section class="panel-wrap console" id="panel-shop" role="tabpanel" aria-labelledby="tab-shop" hidden>
+    <div class="panel decision" id="decision" role="group" aria-label="Your call" hidden>
+      <h2>Your call</h2>
+      <p class="dec-q" id="dec-q"></p>
+      <div class="opts" id="dec-opts"></div>
+    </div>
+    <div class="panel">
+      <div class="stat"><div class="tally" id="tally">0</div><div class="stat-label">manual tasks handled</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="wo-head">
+        <h2>Work order <span class="wo-id" id="wo-id">Not opened</span></h2>
+        <span class="pill" id="status" data-tone="idle">Waiting for a driver</span>
+      </div>
+      <dl class="fields">
+        <div><dt>Opened</dt><dd id="wo-opened" class="is-empty">—</dd></div>
+        <div><dt>Unit</dt><dd id="wo-unit" class="is-empty">—</dd></div>
+        <div><dt>Plate</dt><dd id="wo-plate" class="is-empty">—</dd></div>
+        <div><dt>Reported issue</dt><dd id="wo-issue" class="is-empty">—</dd></div>
+        <div><dt>Fault code</dt><dd id="wo-code" class="is-empty">—</dd></div>
+        <div><dt>Happened</dt><dd id="wo-started" class="is-empty">—</dd></div>
+        <div><dt>Location</dt><dd id="wo-location" class="is-empty">—</dd></div>
+        <div><dt>Photos</dt><dd id="wo-photos" class="is-empty">—</dd></div>
+        <div><dt>Bay</dt><dd id="wo-bay" class="is-empty">—</dd></div>
+        <div><dt>Tech</dt><dd id="wo-tech" class="is-empty">—</dd></div>
+        <div><dt>Part</dt><dd id="wo-part" class="is-empty">—</dd></div>
+        <div><dt>Estimated done</dt><dd id="wo-eta" class="is-empty">—</dd></div>
+      </dl>
+    </div>
+
+    <div class="two">
+      <div class="panel">
+        <h2>Sent by <span class="js-brand">Rig</span></h2>
+        <p class="empty" id="alerts-empty">Nothing sent yet. It only pings people when it matters.</p>
+        <ul class="stack" id="alerts"></ul>
+      </div>
+      <div class="panel">
+        <h2>Parts</h2>
+        <p class="empty" id="parts-empty">No part requests yet.</p>
+        <ul class="stack" id="parts"></ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Night log</h2>
+      <p class="empty" id="log-empty">Everything the agent does shows up here, newest first.</p>
+      <ol class="log" id="log" aria-live="polite"></ol>
+    </div>
+
+    <div class="panel recap">
+      <h2>Shift recap for the day crew</h2>
+      <p class="empty" id="recap-empty">Shows up at 6:00 AM, when the day crew walks in.</p>
+      <div id="recap-body" hidden></div>
+    </div>
+  </section>
+
+  <p class="foot">Scripted demo. In Try it mode your choices change what the shop sees. The driver, the shop, the supplier replies, the prices and the fault code are sample data. The link on the phone is a mock-up, not a live page.</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var BRAND = 'Rig', DOMAIN = 'iamrig.com';
+  var URL_TEXT = DOMAIN + '/truckdown';
+  var $ = function(id){ return document.getElementById(id); };
+  var qa = function(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+  var qs = function(sel){ return document.querySelector(sel); };
+  var CANCEL = {};
+  var lang = 'en', mode = 'watch', idx = 0, busy = false, playing = false, run = 0, tab = 'driver';
+  var tally = 0, replies = 0, alertsSent = 0, asks = 0;
+  var pending = null;
+  var follow = true, auto = true;
+  var S = {};
+
+  /* sample data that depends on what the person picks */
+  var PROB = {
+    engine:  { issue: 'Engine derate',      name: 'Fuel pressure sensor',   pEn: 'a fuel pressure sensor',       pEs: 'un sensor de presión de combustible' },
+    brakes:  { issue: 'Brake problem',      name: 'Brake chamber',          pEn: 'a brake chamber',              pEs: 'una cámara de freno' },
+    tires:   { issue: 'Tire failure',       name: 'Steer tire 295/75R22.5', pEn: 'a steer tire, 295/75R22.5',    pEs: 'una llanta direccional 295/75R22.5' },
+    elec:    { issue: 'Electrical fault',   name: 'Alternator',             pEn: 'an alternator',                pEs: 'un alternador' },
+    reefer:  { issue: 'Reefer unit quit',   name: 'Reefer fan motor',       pEn: 'a reefer fan motor',           pEs: 'un motor de ventilador del reefer' },
+    other:   { issue: 'Needs inspection',   name: 'Part to be confirmed',   pEn: 'a part the tech still has to confirm', pEs: 'una refacción que el técnico todavía tiene que confirmar' }
+  };
+  var WHEN = {
+    now:  { short: 'Just now',         long: 'it happened just now' },
+    '20': { short: 'About 20 min ago', long: 'it happened about 20 minutes ago' },
+    more: { short: 'Earlier tonight',  long: 'it happened earlier tonight' }
+  };
+  var ETA = {
+    A: { due: '6:45 AM', eta: '8:00 AM', price: '$212' },
+    B: { due: '4:30 AM', eta: '5:45 AM', price: '$268' }
+  };
+  function defaults(){
+    S = { make: 'Kenworth', plate: '4471', prob: 'reefer', code: '17', when: '20', photo: true, bay: 2, sup: null, held: false };
+  }
+  defaults();
+  function unit(){ return S.make === 'Other' ? 'Truck' : S.make; }
+  function eta(){ return ETA[S.sup || 'A']; }
+
+  var L = {
+    en: {
+      sms_d: "DOWN", sms_tap: "Tap to text “DOWN”",
+      sms_r: "Border Diesel & Tire night desk. Tell us what's wrong here: {url}",
+      night: "Night desk", cont: "Continue",
+      p_title: "Truck down?", p_sub: "Tell us what happened. We'll send a tech.", p_start: "Start",
+      loc_t: "Where are you?", loc_ok: "Location shared", loc_sub: "At the shop gate",
+      truck_t: "Your truck", make: "Make", plate: "Plate, last 4",
+      prob_t: "What's wrong?", opt_engine: "Engine", opt_brakes: "Brakes", opt_tires: "Tires", opt_elec: "Electrical", opt_reefer: "Reefer unit", opt_other: "Other",
+      code_l: "Fault code (if any)", when_l: "How long ago?", when_now: "Just now", when_20: "About 20 min", when_more: "Earlier",
+      photo_t: "Add a photo", photo_tap: "Tap to add a photo or video", photo_ok: "1 photo added", send: "Send to the shop",
+      sent_t0: "Sent. The shop has your details.", sent_sub0: "We'll update this page as things move.",
+      sent_t: "Go to bay {n}.", sent_sub: "Your tech has been notified.",
+      trk1: "Received", trk2: "In bay {n}", trk3: "Waiting on a part", trk4: "Estimated done: about {eta}", trk_done: "Done",
+      msgs_h: "Messages", ask_q: "How much longer?", ask_q2: "Is the part here yet?",
+      ask_r1: "We're waiting on {part}, due around {due}. Plan on about {eta}. We'll tell you here if that changes.",
+      ask_r2: "Not yet. It's due around {due}. Your tech has everything else ready.",
+      ready: "Your truck is ready. Pull out of bay {n}.",
+      ask_ph: "Ask a question", step_fmt: "Step {n} of 4"
+    },
+    es: {
+      sms_d: "AYUDA", sms_tap: "Toque para enviar “AYUDA”",
+      sms_r: "Border Diesel & Tire, turno de noche. Cuéntenos qué le pasó aquí: {url}",
+      night: "Turno de noche", cont: "Continuar",
+      p_title: "¿Camión descompuesto?", p_sub: "Cuéntenos qué pasó. Le mandamos un técnico.", p_start: "Empezar",
+      loc_t: "¿Dónde está?", loc_ok: "Ubicación compartida", loc_sub: "En el portón del taller",
+      truck_t: "Su camión", make: "Marca", plate: "Placa, últimos 4",
+      prob_t: "¿Qué le pasa?", opt_engine: "Motor", opt_brakes: "Frenos", opt_tires: "Llantas", opt_elec: "Eléctrico", opt_reefer: "Reefer", opt_other: "Otro",
+      code_l: "Código de falla (si hay)", when_l: "¿Hace cuánto?", when_now: "Ahora mismo", when_20: "Hace 20 min", when_more: "Antes",
+      photo_t: "Agregue una foto", photo_tap: "Toque para agregar foto o video", photo_ok: "1 foto agregada", send: "Enviar al taller",
+      sent_t0: "Enviado. El taller ya tiene sus datos.", sent_sub0: "Aquí le avisamos cuando haya cambios.",
+      sent_t: "Pase a la bahía {n}.", sent_sub: "Ya avisamos a su técnico.",
+      trk1: "Recibido", trk2: "En la bahía {n}", trk3: "Esperando una refacción", trk4: "Listo aprox.: {eta}", trk_done: "Listo",
+      msgs_h: "Mensajes", ask_q: "¿Cuánto falta?", ask_q2: "¿Ya llegó la refacción?",
+      ask_r1: "Estamos esperando {part}, llega como a las {due}. Calcule como las {eta}. Aquí le avisamos si cambia.",
+      ask_r2: "Todavía no. Llega como a las {due}. Su técnico ya tiene todo lo demás listo.",
+      ready: "Su camión está listo. Salga de la bahía {n}.",
+      ask_ph: "Haga una pregunta", step_fmt: "Paso {n} de 4"
+    }
+  };
+
+  var NARR = {
+    idle: ["A driver is on the road", "Nothing has happened yet. Press Play the night."],
+    sms: ["At the gate", "A sign says: text DOWN to the shop's number, or scan the code. The driver texts one word."],
+    link: ["No app to install", BRAND + " answers right away with a link. The driver taps it."],
+    open: ["The page opens in his language", "It loads in the phone's browser, in English or Spanish."],
+    loc: ["One tap, exact spot", "Nobody has to explain where the truck is."],
+    truck: ["Only the plate needs typing", "Make and plate are enough. Everything else is a tap."],
+    problem: ["Tap the problem", "Big buttons, and a field for the fault code if the dash shows one."],
+    photo: ["A photo says it faster", "It goes straight onto the work order for the tech."],
+    sent: ["Sent. The shop has it", "The page stays open as a live status, so he doesn't have to text 'how long?'."],
+    bay: ["He knows where to go", "The bay, the tech and the status are all on the same page."],
+    wait: ["The page updates itself", "The part is on order. The driver sees the status change without asking."],
+    ask: ["Questions get answered", "If he still wants to ask, he types it here and the answer comes from the work order."],
+    quiet: ["Nothing for the driver to do", "The owner gets one heads-up. The driver is already informed."],
+    done: ["The truck is done early", "The part came in sooner, so the repair finished before the shift ended. The driver already knows."],
+    day: ["Day crew takes over", "The driver's page keeps showing the same status."]
+  };
+
+  var sleep = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+  async function wait(ms, t){ await sleep(ms); if (t !== run) throw CANCEL; }
+  function el(tag, cls, text){
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fmt(s){ return s.replace('{n}', S.bay).replace('{eta}', eta().eta); }
+  function T(key){ return fmt(L[lang][key]); }
+  function val(x){ return typeof x === 'function' ? x() : x; }
+
+  /* language */
+  function applyLang(){
+    var nodes = document.querySelectorAll('[data-i]');
+    for (var i = 0; i < nodes.length; i++){
+      var k = nodes[i].getAttribute('data-i');
+      if (L[lang][k] != null) nodes[i].textContent = T(k);
+    }
+    var steps = document.querySelectorAll('.pstep');
+    for (var j = 0; j < steps.length; j++){
+      steps[j].textContent = L[lang].step_fmt.replace('{n}', steps[j].getAttribute('data-n'));
+    }
+    $('scr-web').lang = lang;
+  }
+
+  /* tabs */
+  function selectTab(name){
+    tab = name;
+    ['driver', 'shop'].forEach(function(n){
+      var on = n === name;
+      $('tab-' + n).setAttribute('aria-selected', String(on));
+      $('tab-' + n).tabIndex = on ? 0 : -1;
+      $('panel-' + n).hidden = !on;
+    });
+    $('dot-' + name).hidden = true;
+  }
+  function touch(list){
+    list.forEach(function(n){ if (n !== tab) $('dot-' + n).hidden = false; });
+  }
+
+  /* narration. In Try it mode the card tells the person what to tap. */
+  function narr(key, hint){
+    if (mode === 'try' && hint){
+      $('narr-t').textContent = 'Your turn';
+      $('narr-p').textContent = hint;
+    } else {
+      $('narr-t').textContent = NARR[key][0];
+      $('narr-p').textContent = NARR[key][1];
+    }
+  }
+
+  /* waiting for the person to tap something */
+  function clickOne(nodes){
+    return new Promise(function(res, rej){
+      function cleanup(){
+        nodes.forEach(function(n){
+          n.classList.remove('await');
+          n.onclick = null; n.onkeydown = null;
+          if (n.getAttribute('data-aw')){ n.removeAttribute('role'); n.removeAttribute('tabindex'); n.removeAttribute('data-aw'); }
+        });
+      }
+      function done(n){ cleanup(); pending = null; res(n); }
+      nodes.forEach(function(n){
+        n.classList.add('await');
+        if (n.tagName !== 'BUTTON' && n.tagName !== 'INPUT'){ n.setAttribute('role', 'button'); n.tabIndex = 0; n.setAttribute('data-aw', '1'); }
+        n.onclick = function(){ done(n); };
+        n.onkeydown = function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); done(n); } };
+      });
+      pending = { cancel: function(){ cleanup(); rej(CANCEL); } };
+    });
+  }
+  async function choose(nodes, def, t){
+    var n;
+    if (mode === 'try') n = await clickOne(nodes);
+    else { await wait(650, t); n = def; }
+    if (t !== run) throw CANCEL;
+    nodes.forEach(function(x){ x.classList.remove('sel'); });
+    n.classList.add('sel');
+    await wait(mode === 'try' ? 200 : 450, t);
+    return n;
+  }
+  async function press(btn, t, lead){
+    if (mode === 'try') await clickOne([btn]);
+    else { await wait(lead || 700, t); tapFlash(btn); await wait(600, t); }
+    if (t !== run) throw CANCEL;
+    if (mode === 'try') tapFlash(btn);
+    await wait(250, t);
+  }
+  async function decide(t, q, opts, def, hint){
+    var box = $('decision'), wrap = $('dec-opts');
+    $('dec-q').textContent = q;
+    wrap.textContent = '';
+    var btns = opts.map(function(o){
+      var b = el('button', 'opt'); b.type = 'button';
+      b.appendChild(el('span', null, o.label));
+      if (o.sub) b.appendChild(el('small', null, o.sub));
+      wrap.appendChild(b);
+      return b;
+    });
+    box.hidden = false;
+    var i;
+    if (mode === 'try'){
+      selectTab('shop');
+      $('upnext').textContent = 'Waiting on you, on the demo-shop tab: ' + hint;
+      i = btns.indexOf(await clickOne(btns));
+    } else {
+      await wait(1200, t);
+      i = def;
+    }
+    if (t !== run) throw CANCEL;
+    btns.forEach(function(b){ b.classList.remove('sel'); });
+    btns[i].classList.add('sel');
+    await wait(mode === 'try' ? 450 : 1000, t);
+    box.hidden = true;
+    refresh();
+    return i;
+  }
+
+  /* driver: text thread */
+  function smsBubble(who, text){
+    var empty = $('sms-empty'); if (empty) empty.remove();
+    var m = el('div', 'msg ' + who);
+    m.lang = lang;
+    if (text.indexOf('{url}') > -1){
+      var parts = text.split('{url}');
+      m.appendChild(document.createTextNode(parts[0]));
+      var a = el('span', 'link', URL_TEXT);
+      a.id = 'sms-link';
+      m.appendChild(a);
+      m.appendChild(document.createTextNode(parts[1]));
+    } else {
+      m.textContent = text;
+    }
+    $('sms').appendChild(m);
+    $('sms').scrollTop = $('sms').scrollHeight;
+  }
+  function smsTyping(){
+    var empty = $('sms-empty'); if (empty) empty.remove();
+    var ty = el('div', 'msg typing');
+    ty.setAttribute('aria-hidden', 'true');
+    ty.appendChild(el('span')); ty.appendChild(el('span')); ty.appendChild(el('span'));
+    $('sms').appendChild(ty);
+    $('sms').scrollTop = $('sms').scrollHeight;
+    return ty;
+  }
+
+  /* driver: web page */
+  function showScreen(name){
+    $('scr-sms').hidden = name !== 'sms';
+    $('scr-web').hidden = name !== 'web';
+  }
+  function showView(id){
+    ['start','loc','truck','problem','photo','status'].forEach(function(v){ $('v-' + v).hidden = v !== id; });
+    $('page').scrollTop = 0;
+  }
+  async function typeInto(node, text, t){
+    var inp = node.tagName === 'INPUT';
+    if (inp) node.value = ''; else node.textContent = '';
+    for (var i = 0; i < text.length; i++){
+      if (inp) node.value += text.charAt(i); else node.textContent += text.charAt(i);
+      await wait(130, t);
+    }
+  }
+  function tapFlash(node){
+    node.classList.remove('tap');
+    void node.offsetWidth;
+    node.classList.add('tap');
+  }
+  function track(n, state){
+    var li = $('trk' + n);
+    li.hidden = false;
+    li.className = state;
+  }
+  function threadMsg(who, text){
+    var m = el('div', 'msg ' + who, text);
+    m.lang = lang;
+    $('thread').appendChild(m);
+    $('page').scrollTop = $('page').scrollHeight;
+  }
+  function addPhoto(){
+    $('photo').setAttribute('data-state', 'added');
+    $('photo-empty').hidden = true; $('photo-img').hidden = false; $('photo-ok').hidden = false;
+  }
+
+  /* shop */
+  function setWO(key, v){
+    var e = $('wo-' + key);
+    e.textContent = v;
+    e.classList.remove('is-empty');
+    e.classList.remove('flash');
+    void e.offsetWidth;
+    e.classList.add('flash');
+  }
+  function setStatus(text, tone){
+    $('status').textContent = text;
+    $('status').setAttribute('data-tone', tone);
+  }
+  function addAlert(to, time, text){
+    $('alerts-empty').hidden = true;
+    var li = el('li', 'alert');
+    var top = el('div', 'alert-top');
+    top.appendChild(el('span', 'alert-to', 'To: ' + to));
+    top.appendChild(el('span', 'alert-time', time));
+    li.appendChild(top);
+    li.appendChild(el('p', null, text));
+    $('alerts').appendChild(li);
+    alertsSent++;
+  }
+  function addPart(name){
+    $('parts-empty').hidden = true;
+    var li = el('li', 'part');
+    li.appendChild(el('span', 'part-name', name));
+    var st = el('span', 'part-state', 'Asking…');
+    li.appendChild(st);
+    $('parts').appendChild(li);
+    asks++;
+    return st;
+  }
+  function setPart(st, text, tone){
+    st.textContent = text;
+    st.setAttribute('data-tone', tone);
+  }
+  function addLog(time, tag, text){
+    $('log-empty').hidden = true;
+    var li = el('li');
+    li.appendChild(el('span', 'log-time', time));
+    li.appendChild(el('span', 'log-tag', tag));
+    li.appendChild(el('span', 'log-text', text));
+    $('log').insertBefore(li, $('log').firstChild);
+  }
+  function bump(){ tally++; $('tally').textContent = tally; }
+  function showRecap(){
+    $('recap-empty').hidden = true;
+    var body = $('recap-body');
+    body.hidden = false;
+    body.textContent = '';
+    var P = PROB[S.prob], E = eta(), early = S.sup === 'B';
+    var dl = el('dl');
+    [
+      ['Units in', '1'],
+      ['Open jobs', early ? '0. WO-1043 closed overnight' : '1: ' + unit() + ', plate ends in ' + S.plate],
+      ['Waiting on', early ? 'Nothing' : P.name + ', due about ' + E.due],
+      [early ? 'Finished' : 'Estimated done', early ? 'About ' + E.eta : 'About ' + E.eta],
+      ['Parts ordered', P.name + ' from Supplier ' + S.sup + ', ' + E.price],
+      ['Messages to the driver', String(replies)],
+      ['Alerts to staff', String(alertsSent)],
+      ['Supplier requests', String(asks)]
+    ].forEach(function(row){
+      var d = el('div');
+      d.appendChild(el('dt', null, row[0]));
+      d.appendChild(el('dd', null, row[1]));
+      dl.appendChild(d);
+    });
+    body.appendChild(dl);
+    var note = early
+      ? 'Nothing to do. The job closed overnight and the driver was told his truck was ready. No decisions are waiting on you.'
+      : 'For the day crew: install the ' + P.name.toLowerCase() + ' when it arrives, then confirm with the driver. '
+        + (S.held ? 'The owner was not woken up. Let him know the job runs late.' : 'No decisions are waiting on you.');
+    body.appendChild(el('p', 'next', note));
+  }
+
+  /* the night */
+  var EVENTS = [
+    { time: '10:45 PM', title: 'Shift starts', view: 'shop', view: 'shop', touches: ['shop'], run: async function(t){
+      narr('idle');
+      addLog('10:45 PM', 'Handoff', "Read the day crew's handoff. No open jobs carried over.");
+      bump();
+      await wait(800, t);
+    }},
+    { time: '12:20 AM', title: 'A driver texts the gate number', view: 'driver', touches: ['driver', 'shop'], run: async function(t){
+      var Y = mode === 'try';
+      if (Y) selectTab('driver');
+      showScreen('sms');
+      narr('sms', 'You are the driver. Tap the message box to text one word to the shop.');
+      await wait(900, t);
+      if (Y){
+        $('sms-in').textContent = T('sms_tap');
+        await clickOne([$('sms-in')]);
+        $('sms-in').textContent = 'Text message';
+      }
+      smsBubble('driver', T('sms_d'));
+      await wait(700, t);
+      addLog('12:20 AM', 'Intake', 'A driver texted ' + T('sms_d') + ' at the gate. Sent him the truckdown link.');
+      bump();
+      var ty = smsTyping();
+      await wait(1100, t);
+      ty.remove();
+      smsBubble('bot', T('sms_r'));
+      replies++;
+      narr('link', 'The shop answered with a link. Tap it.');
+      if (Y) await clickOne([$('sms-link')]);
+      else { await wait(1700, t); tapFlash($('sms-link')); }
+      await wait(900, t);
+    }},
+    { time: '12:21 AM', title: 'The driver fills in the form', view: 'driver', touches: ['driver', 'shop'], run: async function(t){
+      var Y = mode === 'try';
+      if (Y) selectTab('driver');
+      showScreen('web'); showView('start');
+      narr('open', 'The page opens in the phone. Tap Start.');
+      await press($('btn-start'), t, 1700);
+
+      showView('loc'); narr('loc', 'It asks where the truck is. Tap Continue to share your location.');
+      await press($('btn-loc'), t, 1500);
+
+      showView('truck'); narr('truck', 'Pick your truck make, then type the last 4 of the plate. Any 4 digits work, or leave it blank.');
+      var mk = await choose(qa('#v-truck .chip'), qs('#v-truck .chip[data-v="Kenworth"]'), t);
+      S.make = mk.getAttribute('data-v');
+      if (Y) $('in-plate').focus(); else await typeInto($('in-plate'), '4471', t);
+      await press($('btn-truck'), t);
+      S.plate = ($('in-plate').value.replace(/\D/g, '') || '4471').slice(0, 4);
+      $('in-plate').value = S.plate;
+
+      showView('problem'); narr('problem', 'Tap what is wrong, then how long ago it happened.');
+      var pr = await choose(qa('#v-problem .tile'), qs('#v-problem .tile[data-v="reefer"]'), t);
+      S.prob = pr.getAttribute('data-v');
+      var wh = await choose(qa('#v-problem .chip'), qs('#v-problem .chip[data-v="20"]'), t);
+      S.when = wh.getAttribute('data-v');
+      if (Y){ narr('problem', 'Type a fault code if the dash shows one (optional), then tap Continue.'); $('in-code').focus(); }
+      else await typeInto($('in-code'), '17', t);
+      await press($('btn-prob'), t);
+      S.code = $('in-code').value.trim().slice(0, 5);
+
+      showView('photo'); narr('photo', 'Tap the photo box to add a picture, then send. You can also send without one.');
+      if (Y){
+        var n = await clickOne([$('photo'), $('btn-send')]);
+        if (n === $('photo')){ S.photo = true; addPhoto(); await press($('btn-send'), t); }
+        else { S.photo = false; tapFlash($('btn-send')); await wait(250, t); }
+      } else {
+        await wait(900, t); S.photo = true; addPhoto();
+        await press($('btn-send'), t, 1100);
+      }
+
+      showView('status'); narr('sent');
+      if (mode === 'watch' && follow){ await wait(1100, t); selectTab('shop'); }
+      track(1, 'active');
+      track(2, ''); track(3, '');
+      touch(['shop']);
+      var P = PROB[S.prob];
+      $('wo-id').textContent = 'WO-1043';
+      setWO('opened', '12:21 AM');
+      setWO('unit', unit());
+      setWO('plate', 'Ends in ' + S.plate);
+      setWO('issue', P.issue);
+      setWO('code', S.code || 'None');
+      setWO('started', WHEN[S.when].short);
+      setWO('location', 'At the shop gate');
+      setWO('photos', S.photo ? '1 photo' : 'None');
+      setStatus('Intake', 'active');
+      addLog('12:21 AM', 'Order', 'The driver filled in the form: truck, problem' + (S.code ? ', code' : '') + ', location' + (S.photo ? ' and a photo' : '') + '. Opened work order WO-1043.');
+      bump();
+      await wait(1000, t);
+    }},
+    { time: '12:23 AM', title: 'The shop assigns a bay', view: 'shop', touches: ['driver', 'shop'], run: async function(t){
+      var P = PROB[S.prob];
+      showScreen('web'); showView('status');
+      narr('sent');
+      var bi = await decide(t, 'Work order WO-1043 is ready. Which bay should the agent send the truck to?',
+        [{ label: 'Bay 1', sub: 'Open' }, { label: 'Bay 2', sub: 'Open' }, { label: 'Bay 3', sub: 'Open' }], 1, 'pick a bay for the truck.');
+      S.bay = bi + 1;
+      if (mode === 'watch' && follow) selectTab('driver');
+      $('st-title').setAttribute('data-i', 'sent_t'); $('st-title').textContent = T('sent_t');
+      $('st-sub').setAttribute('data-i', 'sent_sub'); $('st-sub').textContent = T('sent_sub');
+      $('trk2').textContent = T('trk2');
+      track(1, 'done'); track(2, 'active'); track(3, '');
+      narr('bay');
+      setWO('bay', 'Bay ' + S.bay);
+      setWO('tech', 'Night tech');
+      setStatus('In bay ' + S.bay, 'active');
+      await wait(600, t);
+      addAlert('Night tech', '12:23 AM', 'Bay ' + S.bay + ': ' + unit() + ', plate ends in ' + S.plate + '. ' + P.issue + ', ' + (S.code ? 'fault code ' + S.code : 'no fault code') + ', ' + WHEN[S.when].long + '. ' + (S.photo ? 'Photo attached. ' : 'No photo. ') + 'Driver is pulling in now.');
+      addLog('12:23 AM', 'Alert', 'Assigned bay ' + S.bay + ' and pinged the night tech. The driver sees where to go on his page.');
+      bump();
+      await wait(1000, t);
+    }},
+    { time: '2:05 AM', title: "The part isn't on the shelf", view: 'shop', touches: ['driver', 'shop'], run: async function(t){
+      var P = PROB[S.prob];
+      track(1, 'done'); track(2, 'done'); track(3, 'active');
+      narr('wait');
+      addLog('2:05 AM', 'Parts', 'The tech needs ' + P.pEn + ' and the shop has none. Asking two suppliers.');
+      setWO('part', P.name);
+      setStatus('Waiting on part', 'wait');
+      var a = addPart('Supplier A');
+      var b = addPart('Supplier B');
+      await wait(1300, t);
+      setPart(a, 'In stock. ' + ETA.A.price + ', delivers by ' + ETA.A.due + '.', 'ok');
+      await wait(900, t);
+      setPart(b, 'In stock. ' + ETA.B.price + ' rush, delivers by ' + ETA.B.due + '.', 'ok');
+      addLog('2:09 AM', 'Parts', 'Both suppliers have it. A is cheaper and later, B is faster and costs more.');
+      var i = await decide(t, 'Both suppliers have the part. Which one should the agent order from?',
+        [{ label: 'Supplier A', sub: ETA.A.price + ' · arrives ' + ETA.A.due + ' · truck done about ' + ETA.A.eta },
+         { label: 'Supplier B', sub: ETA.B.price + ' rush · arrives ' + ETA.B.due + ' · truck done about ' + ETA.B.eta }], 0, 'pick a supplier.');
+      S.sup = i === 0 ? 'A' : 'B';
+      var E = eta();
+      setPart(i === 0 ? a : b, 'Ordered. Arrives ' + E.due + '.', 'ok');
+      setPart(i === 0 ? b : a, 'Not needed.', '');
+      setWO('eta', 'About ' + E.eta);
+      setStatus('Est. ' + E.eta, 'wait');
+      addLog('2:10 AM', 'Parts', 'Ordered from Supplier ' + S.sup + '. The tech confirms. Estimated done about ' + E.eta + '.');
+      bump();
+      await wait(700, t);
+    }},
+    { time: '3:30 AM', title: 'The driver asks a question', view: 'driver', touches: ['driver', 'shop'], run: async function(t){
+      var Y = mode === 'try', P = PROB[S.prob], E = eta();
+      if (Y) selectTab('driver');
+      showScreen('web'); showView('status');
+      narr('ask', 'You are still the driver. Ask the page a question.');
+      var box = $('ask-in');
+      var q = 0, qtext;
+      if (Y){
+        var wrap = $('ask-opts'); wrap.textContent = '';
+        var chips = [T('ask_q'), T('ask_q2')].map(function(s){ var c = el('span', 'chip', s); wrap.appendChild(c); return c; });
+        wrap.hidden = false;
+        $('page').scrollTop = $('page').scrollHeight;
+        q = chips.indexOf(await clickOne(chips));
+        wrap.hidden = true;
+      } else {
+        box.style.color = 'var(--text)';
+        await typeInto(box, T('ask_q'), t);
+        await wait(500, t);
+        box.textContent = T('ask_ph'); box.style.color = '';
+      }
+      qtext = q === 0 ? T('ask_q') : T('ask_q2');
+      threadMsg('driver', qtext);
+      await wait(500, t);
+      var ty = el('div', 'msg typing'); ty.setAttribute('aria-hidden', 'true');
+      ty.appendChild(el('span')); ty.appendChild(el('span')); ty.appendChild(el('span'));
+      $('thread').appendChild(ty);
+      $('page').scrollTop = $('page').scrollHeight;
+      await wait(1200, t);
+      ty.remove();
+      var reply = T(q === 0 ? 'ask_r1' : 'ask_r2').replace('{part}', lang === 'es' ? P.pEs : P.pEn).replace('{due}', E.due);
+      threadMsg('bot', reply);
+      replies++;
+      $('trk4').textContent = T('trk4');
+      track(4, '');
+      $('page').scrollTop = $('page').scrollHeight;
+      addLog('3:30 AM', 'Reply', 'The driver asked "' + L.en[q === 0 ? 'ask_q' : 'ask_q2'] + '" on his page. Answered from the work order. The tech stayed under the truck.');
+      bump();
+      await wait(900, t);
+    }},
+    { time: function(){ return S.sup === 'B' ? '5:45 AM' : '4:50 AM'; },
+      title: function(){ return S.sup === 'B' ? 'The part is in and the truck is done' : 'The owner needs to know'; },
+      view: 'shop', touches: ['shop', 'driver'], run: async function(t){
+      var P = PROB[S.prob], E = eta();
+      if (S.sup === 'B'){
+        narr('done');
+        addAlert('Night tech', '4:30 AM', 'The ' + P.name.toLowerCase() + ' just arrived at the front desk. Install it in bay ' + S.bay + '.');
+        addLog('4:30 AM', 'Parts', 'Supplier B delivered the ' + P.name.toLowerCase() + '. The tech is installing it.');
+        await wait(900, t);
+        addLog('5:45 AM', 'Done', 'Repair finished in bay ' + S.bay + '. Told the driver his truck is ready. No owner alert needed, the job ended before the shift did.');
+        setStatus('Done', 'active');
+        setWO('eta', 'Done 5:45 AM');
+        track(3, 'done');
+        $('trk4').setAttribute('data-i', 'trk_done'); $('trk4').textContent = T('trk_done'); track(4, 'done');
+        threadMsg('bot', T('ready'));
+        if (mode === 'watch' && follow) selectTab('driver');
+        replies++;
+        bump();
+        await wait(mode === 'watch' ? 2200 : 900, t);
+      } else {
+        narr('quiet');
+        var i = await decide(t, 'The job will run past the night shift. Should the agent wake the owner?',
+          [{ label: 'Send the heads-up', sub: 'One message. Nothing needed back' }, { label: 'Hold it', sub: 'It goes in the day recap instead' }], 0, 'decide if the owner gets a heads-up.');
+        S.held = i === 1;
+        if (!S.held){
+          addAlert('Owner', '4:50 AM', "Heads-up: the " + unit() + " (" + S.plate + ") won't be done before about " + E.eta + ". Waiting on " + P.pEn + " due around " + E.due + ". The driver is informed. Nothing needed from you.");
+          addLog('4:50 AM', 'Alert', 'Sent the owner one heads-up, because the job runs past the night shift.');
+        } else {
+          addLog('4:50 AM', 'Alert', 'Held the owner heads-up as you asked. It goes in the day recap.');
+        }
+        bump();
+        await wait(900, t);
+      }
+    }},
+    { time: '6:00 AM', title: 'The day crew walks in', view: 'shop', touches: ['shop'], run: async function(t){
+      narr('day');
+      addLog('6:00 AM', 'Recap', 'Wrote the shift recap for the day crew.');
+      bump();
+      showRecap();
+      await wait(700, t);
+    }}
+  ];
+
+  /* controls */
+  function refresh(){
+    var done = idx >= EVENTS.length;
+    $('next').disabled = busy || playing || done;
+    $('play').disabled = busy && !playing;
+    $('play').textContent = playing ? 'Pause' : (done ? 'Replay' : (idx === 0 ? 'Play the night' : 'Resume'));
+    var lead = (mode === 'try' && idx === 0)
+      ? 'Try it mode: you play the driver and make the shop’s calls. Choose Watch to see it run on its own. '
+      : '';
+    $('upnext').textContent = done
+      ? 'End of shift. Press Replay to run it again, or change a choice.'
+      : lead + 'Step ' + (idx + 1) + ' of ' + EVENTS.length + '. Up next: ' + val(EVENTS[idx].title) + '. New activity shows as a dot on the other tab.';
+  }
+
+  async function step(){
+    if (busy || idx >= EVENTS.length) return false;
+    busy = true;
+    var t = run, ev = EVENTS[idx];
+    $('clock').textContent = val(ev.time);
+    $('now').textContent = val(ev.title);
+    touch(ev.touches);
+    if (mode === 'watch' && follow && ev.view) selectTab(ev.view);
+    refresh();
+    try {
+      await ev.run(t);
+      if (t !== run) return false;
+      idx++;
+      busy = false;
+      refresh();
+      return true;
+    } catch (e) {
+      if (e !== CANCEL) { console.error(e); busy = false; refresh(); }
+      return false;
+    }
+  }
+
+  async function play(){
+    if (playing) { playing = false; refresh(); return; }
+    if (idx >= EVENTS.length) reset();
+    playing = true;
+    refresh();
+    var t = run;
+    while (playing && t === run && idx < EVENTS.length){
+      var ok = await step();
+      if (!ok || t !== run) break;
+      if (idx >= EVENTS.length) break;
+      try { await wait(1500, t); } catch (e) { return; }
+    }
+    if (t === run){ playing = false; refresh(); }
+    if (t === run && auto && mode === 'watch' && idx >= EVENTS.length){
+      try { await wait(9000, t); } catch (e) { return; }
+      if (auto && t === run){ reset(); play(); }
+    }
+  }
+
+  function reset(){
+    run++;
+    if (pending){ var p = pending; pending = null; p.cancel(); }
+    busy = false; playing = false; idx = 0;
+    defaults();
+    tally = replies = alertsSent = asks = 0;
+    $('tally').textContent = '0';
+    $('clock').textContent = '10:45 PM';
+    $('now').textContent = 'Shift starts';
+    $('dot-driver').hidden = true; $('dot-shop').hidden = true;
+    $('decision').hidden = true; $('dec-opts').textContent = '';
+
+    /* driver */
+    showScreen('sms');
+    $('sms').textContent = '';
+    var empty = el('p', 'sms-empty', 'No messages yet. A driver texts at 12:20 AM.');
+    empty.id = 'sms-empty';
+    $('sms').appendChild(empty);
+    $('sms-in').textContent = 'Text message';
+    qa('#v-truck .chip, #v-problem .chip, #v-problem .tile').forEach(function(n){ n.classList.remove('sel'); });
+    $('in-plate').value = ''; $('in-code').value = '';
+    $('photo').setAttribute('data-state', 'empty');
+    $('photo-empty').hidden = false; $('photo-img').hidden = true; $('photo-ok').hidden = true;
+    qa('.fake-btn').forEach(function(n){ n.classList.remove('tap'); });
+    qa('.await').forEach(function(n){ n.classList.remove('await'); n.onclick = null; n.onkeydown = null; });
+    $('st-title').setAttribute('data-i', 'sent_t0');
+    $('st-sub').setAttribute('data-i', 'sent_sub0');
+    $('trk4').setAttribute('data-i', 'trk4');
+    ['trk1', 'trk2', 'trk3', 'trk4'].forEach(function(id){ $(id).className = ''; });
+    $('trk4').hidden = true;
+    $('thread').textContent = '';
+    $('ask-opts').hidden = true; $('ask-opts').textContent = '';
+    $('ask-in').style.color = '';
+    showView('start');
+    applyLang();
+    $('ask-in').textContent = T('ask_ph');
+    narr('idle');
+
+    /* shop */
+    $('wo-id').textContent = 'Not opened';
+    ['opened','unit','plate','issue','code','started','location','photos','bay','tech','part','eta'].forEach(function(k){
+      var e = $('wo-' + k);
+      e.textContent = '—';
+      e.className = 'is-empty';
+    });
+    setStatus('Waiting for a driver', 'idle');
+    $('alerts').textContent = ''; $('alerts-empty').hidden = false;
+    $('parts').textContent = ''; $('parts-empty').hidden = false;
+    $('log').textContent = ''; $('log-empty').hidden = false;
+    $('recap-body').hidden = true; $('recap-body').textContent = ''; $('recap-empty').hidden = false;
+    refresh();
+  }
+
+  function setLang(l){
+    lang = l;
+    reset();
+  }
+  function setMode(m){
+    mode = m;
+    $('mode-try').setAttribute('aria-pressed', String(m === 'try'));
+    $('mode-watch').setAttribute('aria-pressed', String(m === 'watch'));
+    reset();
+  }
+
+  /* wiring */
+  var brandNodes = document.querySelectorAll('.js-brand');
+  for (var b = 0; b < brandNodes.length; b++) brandNodes[b].textContent = BRAND;
+  var domNodes = document.querySelectorAll('.js-domain');
+  for (var d = 0; d < domNodes.length; d++) domNodes[d].textContent = DOMAIN;
+
+  $('tab-driver').addEventListener('click', function(){ auto = false; follow = false; selectTab('driver'); });
+  $('tab-shop').addEventListener('click', function(){ auto = false; follow = false; selectTab('shop'); });
+  [$('tab-driver'), $('tab-shop')].forEach(function(btn){
+    btn.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+        auto = false; follow = false;
+        var next = tab === 'driver' ? 'shop' : 'driver';
+        selectTab(next);
+        $('tab-' + next).focus();
+      }
+    });
+  });
+  $('in-plate').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('btn-truck').click(); });
+  $('in-code').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('btn-prob').click(); });
+  $('next').addEventListener('click', function(){ auto = false; follow = true; step(); });
+  $('play').addEventListener('click', function(){ auto = false; follow = true; play(); });
+  $('reset').addEventListener('click', function(){ auto = false; follow = true; reset(); });
+  $('mode-try').addEventListener('click', function(){ auto = false; setMode('try'); });
+  $('mode-watch').addEventListener('click', function(){ auto = false; follow = true; setMode('watch'); });
+  reset();
+  if (!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
+    setTimeout(function(){ if (auto && idx === 0 && !playing && !busy) play(); }, 1200);
+  }
+})();
+</script>
+</body>
+</html>
